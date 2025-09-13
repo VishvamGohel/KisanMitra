@@ -1,0 +1,23 @@
+{
+  "name": "kisanmitra-local",
+  "version": "1.0.0",
+  "description": "Local development setup for KisanMitra app.",
+  "main": "index.tsx",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs --build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/genai": "^1.19.0",
+    "marked": "^13.0.2"
+  },
+  "devDependencies": {
+    "@types/marked": "^6.0.0",
+    "dotenv": "^16.4.5",
+    "esbuild": "^0.23.0",
+    "typescript": "^5.5.3"
+  }
+}
