@@ -1,4 +1,5 @@
 
+
 /* General Styles */
 :root {
   --primary-green: #3A6351;
@@ -10,6 +11,8 @@
   --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   --border-radius: 16px;
   --bottom-nav-height: 70px;
+  --trend-up: #27ae60;
+  --trend-down: #e74c3c;
 }
 
 * {
@@ -457,23 +460,75 @@ body {
 }
 
 /* Market Page */
-.market-list-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  border-bottom: 1px solid #eee;
+.market-header {
+    margin-bottom: 2rem;
 }
-.market-list-item:last-child {
-  border-bottom: none;
+.market-header h1 {
+    color: var(--primary-green);
+    font-size: 2.2rem;
+    font-weight: 600;
 }
-.market-list-item .crop-name {
-  font-weight: 600;
+.market-header p {
+    color: #777;
 }
-.market-list-item .price {
-  color: var(--primary-green);
-  font-weight: 600;
+
+#market-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
+
+.market-price-card {
+    background-color: var(--card-background);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.market-price-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.07);
+}
+
+.crop-info .crop-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+.crop-info .unit {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.price-info {
+    text-align: right;
+}
+.price-info .price {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+.trend-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.trend-indicator.trend-up {
+    color: var(--trend-up);
+}
+.trend-indicator.trend-down {
+    color: var(--trend-down);
+}
+.trend-indicator svg {
+    margin-bottom: 2px;
+}
+
 .error-message {
     color: #c0392b;
     font-weight: 500;
@@ -793,6 +848,103 @@ body {
   50%, 100% { background-color: rgba(58, 99, 81, 0.2); }
 }
 
+/* Offline Page */
+.offline-page {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: var(--primary-beige);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  text-align: center;
+  animation: fadeIn 0.5s;
+  z-index: 3000;
+}
+
+.offline-card {
+  background-color: var(--card-background);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  max-width: 400px;
+  width: 100%;
+}
+
+.offline-card h1 {
+  color: var(--primary-green);
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.offline-card p {
+  color: #555;
+  margin-bottom: 2rem;
+}
+
+.offline-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.offline-input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  text-align: center;
+}
+
+.offline-btn {
+  background-color: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: background-color 0.3s;
+}
+
+.offline-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.sms-summary {
+  margin-top: 2rem;
+  text-align: left;
+  background-color: #f0f0f0;
+  padding: 1rem;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.send-sms-link {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 1rem 2rem;
+    background-color: #27ae60;
+    color: white !important;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+.send-sms-link:hover {
+    background-color: #229954;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .page-header { font-size: 1.8rem; }
@@ -804,4 +956,5 @@ body {
   .crop-grid { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 1rem; }
   .crop-icon-wrapper { width: 65px; height: 65px; }
   .crop-icon { font-size: 2rem; }
+  .market-header h1 { font-size: 1.8rem; }
 }

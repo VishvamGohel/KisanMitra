@@ -1,84 +1,63 @@
 
-
 import { GoogleGenAI, Chat } from "@google/genai";
 import { marked } from 'marked';
 
 // TODO: Replace with your actual WeatherAPI.com API key
 const WEATHER_API_KEY = '4522ecbfce5d46fab22115230251309';
 
-// TODO: Replace with your actual Google GenAI API key
+// TODO: Replace 'YOUR_GOOGLE_GENAI_API_KEY' with your actual API key or use a secure method to inject it
 const ai = new GoogleGenAI({apiKey: 'AIzaSyCvEfS-nRy8q1Bpx2SQiRIXzoKdVdjKMOA'});
 let chat: Chat;
 
-// Data processed from the user-provided text file
-const marketDatabase = [
-  {"state": "Andhra Pradesh", "district": "Krishna", "commodity": "Maize", "modal_price": "2350"},
-  {"state": "Andhra Pradesh", "district": "Krishna", "commodity": "Paddy(Dhan)(Common)", "modal_price": "2300"},
-  {"state": "Andhra Pradesh", "district": "Nellore", "commodity": "Cotton", "modal_price": "7521"},
-  {"state": "Gujarat", "district": "Amreli", "commodity": "Cotton", "modal_price": "7200"},
-  {"state": "Gujarat", "district": "Amreli", "commodity": "Guar", "modal_price": "4800"},
-  {"state": "Gujarat", "district": "Bharuch", "commodity": "Cotton", "modal_price": "6000"},
-  {"state": "Gujarat", "district": "Gandhinagar", "commodity": "Bajra(Pearl Millet/Cumbu)", "modal_price": "2150"},
-  {"state": "Gujarat", "district": "Mehsana", "commodity": "Bajra(Pearl Millet/Cumbu)", "modal_price": "2625"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Bitter gourd", "modal_price": "3750"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Cucumbar(Kheera)", "modal_price": "2250"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Indian Beans (Seam)", "modal_price": "6250"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Lemon", "modal_price": "2500"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Potato", "modal_price": "1225"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Turmeric (raw)", "modal_price": "8500"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Banana - Green", "modal_price": "1000"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Brinjal", "modal_price": "6500"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Carrot", "modal_price": "1900"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Cauliflower", "modal_price": "2400"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Ginger(Green)", "modal_price": "3000"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Sweet Potato", "modal_price": "4000"},
-  {"state": "Gujarat", "district": "Surat", "commodity": "Tomato", "modal_price": "1150"},
-  {"state": "Haryana", "district": "Bhiwani", "commodity": "Onion", "modal_price": "1750"},
-  {"state": "Haryana", "district": "Bhiwani", "commodity": "Potato", "modal_price": "1450"},
-  {"state": "Madhya Pradesh", "district": "Damoh", "commodity": "Wheat", "modal_price": "2405"},
-  {"state": "Madhya Pradesh", "district": "Indore", "commodity": "Soyabean", "modal_price": "4350"},
-  {"state": "Madhya Pradesh", "district": "Indore", "commodity": "Garlic", "modal_price": "3500"},
-  {"state": "Madhya Pradesh", "district": "Indore", "commodity": "Wheat", "modal_price": "2701"},
-  {"state": "Maharashtra", "district": "Nagpur", "commodity": "Brinjal", "modal_price": "1840"},
-  {"state": "Maharashtra", "district": "Pune", "commodity": "Cabbage", "modal_price": "750"},
-  {"state": "Maharashtra", "district": "Pune", "commodity": "Tomato", "modal_price": "1250"},
-  {"state": "Maharashtra", "district": "Raigad", "commodity": "Rice", "modal_price": "3800"},
-  {"state": "Punjab", "district": "Gurdaspur", "commodity": "Potato", "modal_price": "1000"},
-  {"state": "Punjab", "district": "Ludhiana", "commodity": "Onion", "modal_price": "2100"},
-  {"state": "Punjab", "district": "Ludhiana", "commodity": "Potato", "modal_price": "600"},
-  {"state": "Rajasthan", "district": "Ganganagar", "commodity": "Potato", "modal_price": "1550"},
-  {"state": "Rajasthan", "district": "Jaipur Rural", "commodity": "Guar Seed(Cluster Beans Seed)", "modal_price": "4617"},
-  {"state": "Uttar Pradesh", "district": "Aligarh", "commodity": "Bajra(Pearl Millet/Cumbu)", "modal_price": "2150"},
-  {"state": "Uttar Pradesh", "district": "Aligarh", "commodity": "Green Chilli", "modal_price": "4250"},
-  {"state": "Uttar Pradesh", "district": "Badaun", "commodity": "Wheat", "modal_price": "2480"},
-  {"state": "Uttar Pradesh", "district": "Bareilly", "commodity": "Tomato", "modal_price": "2200"},
-  {"state": "Uttar Pradesh", "district": "Jhansi", "commodity": "Groundnut", "modal_price": "5580"},
-  {"state": "Uttar Pradesh", "district": "Jhansi", "commodity": "Wheat", "modal_price": "2540"},
-  {"state": "West Bengal", "district": "Medinipur(W)", "commodity": "Onion", "modal_price": "1950"},
-  {"state": "West Bengal", "district": "Medinipur(W)", "commodity": "Paddy(Dhan)(Common)", "modal_price": "2330"},
-  {"state": "West Bengal", "district": "Medinipur(W)", "commodity": "Potato", "modal_price": "1340"},
-];
-
-// Maps commodity names from the data file to the app's standard crop names
-const commodityMap = {
-    'Paddy(Dhan)(Common)': 'Rice', 'Rice': 'Rice',
-    'Wheat': 'Wheat',
-    'Sugarcane': 'Sugarcane',
-    'Cotton': 'Cotton',
-    'Arhar (Tur/Red Gram)(Whole)': 'Pulses', 'Bengal Gram(Gram)(Whole)': 'Pulses', 'Lentil (Masur)(Whole)': 'Pulses', 'Black Gram (Urd Beans)(Whole)': 'Pulses', 'Peas Wet': 'Pulses', 'Field Pea': 'Pulses', 'White Peas': 'Pulses',
-    'Mustard': 'Oilseeds', 'Sesamum(Sesame,Gingelly,Til)': 'Oilseeds', 'Castor Seed': 'Oilseeds',
-    'Maize': 'Maize',
-    'Potato': 'Potato',
-    'Onion': 'Onion',
-    'Tomato': 'Tomato',
-    'Soyabean': 'Soybean',
-    'Groundnut': 'Groundnut', 'Ground Nut Seed': 'Groundnut', 'Groundnut pods (raw)': 'Groundnut',
-    'Bajra(Pearl Millet/Cumbu)': 'Millets', 'Jowar(Sorghum)': 'Millets',
-    'Mango (Raw-Ripe)': 'Mango', 'Mango': 'Mango',
-    'Banana': 'Banana', 'Banana - Green': 'Banana',
-    'Tea': 'Tea'
+const offlineCropPriceData = {
+  "metadata": {
+    "region": "Gujarat (demo values)",
+    "unit_price": "INR per kg",
+    "generated_for": "KisanMitra offline/demo dataset",
+    "disclaimer": "Demo/sample values for hackathon; not authoritative market data. Use for demo and offline flows only."
+  },
+  "crops": [
+    { "crop": "rice", "main_season": "Kharif", "state_avg_price_inr_per_kg": 28, "cities": { "Ahmedabad": 29, "Surat": 28.5, "Rajkot": 27.5, "Vadodara": 28.2 } },
+    { "crop": "wheat", "main_season": "Rabi", "state_avg_price_inr_per_kg": 24, "cities": { "Ahmedabad": 24.7, "Surat": 24.5, "Rajkot": 23.5, "Vadodara": 24.2 } },
+    { "crop": "sugarcane", "main_season": "Kharif", "state_avg_price_inr_per_kg": 3.5, "cities": { "Ahmedabad": 3.6, "Surat": 3.55, "Rajkot": 3.4, "Vadodara": 3.5 } },
+    { "crop": "cotton", "main_season": "Kharif", "state_avg_price_inr_per_kg": 200, "cities": { "Ahmedabad": 206, "Surat": 204, "Rajkot": 196, "Vadodara": 202 } },
+    { "crop": "pulses", "main_season": "Rabi/Kharif", "state_avg_price_inr_per_kg": 90, "cities": { "Ahmedabad": 93, "Surat": 92, "Rajkot": 88, "Vadodara": 91 } },
+    { "crop": "oilseeds", "main_season": "Rabi/Kharif", "state_avg_price_inr_per_kg": 80, "cities": { "Ahmedabad": 82, "Surat": 81.5, "Rajkot": 78, "Vadodara": 81 } },
+    { "crop": "maize", "main_season": "Kharif", "state_avg_price_inr_per_kg": 18, "cities": { "Ahmedabad": 18.5, "Surat": 18.3, "Rajkot": 17.6, "Vadodara": 18.2 } },
+    { "crop": "potato", "main_season": "Rabi", "state_avg_price_inr_per_kg": 12, "cities": { "Ahmedabad": 12.3, "Surat": 12.2, "Rajkot": 11.8, "Vadodara": 12.1 } },
+    { "crop": "onion", "main_season": "Kharif/Rabi", "state_avg_price_inr_per_kg": 20, "cities": { "Ahmedabad": 20.6, "Surat": 20.4, "Rajkot": 19.6, "Vadodara": 20.2 } },
+    { "crop": "tomato", "main_season": "Summer/Kharif", "state_avg_price_inr_per_kg": 22, "cities": { "Ahmedabad": 22.6, "Surat": 22.4, "Rajkot": 21.5, "Vadodara": 22.2 } },
+    { "crop": "soybean", "main_season": "Kharif", "state_avg_price_inr_per_kg": 45, "cities": { "Ahmedabad": 46, "Surat": 45.8, "Rajkot": 44, "Vadodara": 45.5 } },
+    { "crop": "groundnut", "main_season": "Kharif", "state_avg_price_inr_per_kg": 85, "cities": { "Ahmedabad": 87.5, "Surat": 86.5, "Rajkot": 83, "Vadodara": 85.8 } },
+    { "crop": "millets", "main_season": "Kharif", "state_avg_price_inr_per_kg": 25, "cities": { "Ahmedabad": 25.7, "Surat": 25.5, "Rajkot": 24.5, "Vadodara": 25.2 } },
+    { "crop": "mango", "main_season": "Summer", "state_avg_price_inr_per_kg": 60, "cities": { "Ahmedabad": 61.8, "Surat": 61.2, "Rajkot": 58.8, "Vadodara": 60.6 } },
+    { "crop": "banana", "main_season": "Year-round", "state_avg_price_inr_per_kg": 35, "cities": { "Ahmedabad": 36, "Surat": 35.7, "Rajkot": 34.3, "Vadodara": 35.3 } },
+    { "crop": "tea", "main_season": "Year-round", "state_avg_price_inr_per_kg": 250, "cities": { "Ahmedabad": 257, "Surat": 255, "Rajkot": 245, "Vadodara": 252 } }
+  ]
 };
 
+const offlineCityData = {
+  "Ahmedabad": { "lat": 23.0225, "lon": 72.5714, "season": "Rabi", "recommendedCrop": "Wheat", "farmerTipNext2h": "Irrigate lightly in the evening to retain soil moisture.", "temp": "30°C" },
+  "Surat": { "lat": 21.1702, "lon": 72.8311, "season": "Kharif", "recommendedCrop": "Cotton", "farmerTipNext2h": "Check for pest activity on leaves and apply neem spray if needed.", "temp": "29°C" },
+  "Rajkot": { "lat": 22.3039, "lon": 70.8022, "season": "Rabi", "recommendedCrop": "Groundnut", "farmerTipNext2h": "Avoid overwatering, keep soil slightly dry for healthy pods.", "temp": "32°C" },
+  "Vadodara": { "lat": 22.3072, "lon": 73.1812, "season": "Summer", "recommendedCrop": "Maize", "farmerTipNext2h": "Weed your maize field now for better growth this season.", "temp": "34°C" },
+  "Bhavnagar": { "lat": 21.7645, "lon": 72.1519, "season": "Kharif", "recommendedCrop": "Bajra", "farmerTipNext2h": "Prepare soil for next sowing with light tilling.", "temp": "31°C" },
+  "Junagadh": { "lat": 21.5222, "lon": 70.4579, "season": "Kharif", "recommendedCrop": "Cotton", "farmerTipNext2h": "Monitor for bollworm and remove infected bolls immediately.", "temp": "28°C" },
+  "Jamnagar": { "lat": 22.4707, "lon": 70.0577, "season": "Rabi", "recommendedCrop": "Wheat", "farmerTipNext2h": "Apply fertilizer top-dressing before irrigation today.", "temp": "29°C" },
+  "Gandhinagar": { "lat": 23.2156, "lon": 72.6369, "season": "Summer", "recommendedCrop": "Vegetables (Okra)", "farmerTipNext2h": "Harvest ripe okra pods in the early morning.", "temp": "33°C" },
+  "Anand": { "lat": 22.5645, "lon": 72.9284, "season": "Rabi", "recommendedCrop": "Rice", "farmerTipNext2h": "Drain excess water from rice field if standing.", "temp": "27°C" },
+  "Nadiad": { "lat": 22.6953, "lon": 72.8617, "season": "Summer", "recommendedCrop": "Maize", "farmerTipNext2h": "Apply organic compost for soil health improvement.", "temp": "34°C" },
+  "Bharuch": { "lat": 21.7051, "lon": 72.9959, "season": "Kharif", "recommendedCrop": "Sugarcane", "farmerTipNext2h": "Check sugarcane shoots for early stem borer damage.", "temp": "30°C" },
+  "Navsari": { "lat": 20.9520, "lon": 72.9323, "season": "Kharif", "recommendedCrop": "Rice", "farmerTipNext2h": "Spray fungicide if you observe leaf spot symptoms.", "temp": "28°C" },
+  "Valsad": { "lat": 20.6300, "lon": 72.9333, "season": "Kharif", "recommendedCrop": "Banana", "farmerTipNext2h": "Support banana plants with bamboo to avoid wind damage.", "temp": "30°C" },
+  "Porbandar": { "lat": 21.6417, "lon": 69.6293, "season": "Summer", "recommendedCrop": "Groundnut", "farmerTipNext2h": "Check soil moisture; irrigate if cracks appear.", "temp": "33°C" },
+  "Mehsana": { "lat": 23.5891, "lon": 72.3693, "season": "Rabi", "recommendedCrop": "Mustard", "farmerTipNext2h": "Remove weeds now to avoid competition for nutrients.", "temp": "26°C" },
+  "Palanpur": { "lat": 24.1724, "lon": 72.4333, "season": "Rabi", "recommendedCrop": "Cumin", "farmerTipNext2h": "Thin seedlings to improve spacing and yield.", "temp": "25°C" },
+  "Bhuj": { "lat": 23.2530, "lon": 69.6667, "season": "Summer", "recommendedCrop": "Millets", "farmerTipNext2h": "Mulch the soil to preserve moisture in hot weather.", "temp": "36°C" },
+  "Morbi": { "lat": 22.8225, "lon": 70.8265, "season": "Rabi", "recommendedCrop": "Cotton", "farmerTipNext2h": "Clean fallen leaves around plants to prevent pests.", "temp": "31°C" },
+  "Patan": { "lat": 23.8493, "lon": 72.1266, "season": "Rabi", "recommendedCrop": "Wheat", "farmerTipNext2h": "Irrigate wheat field in the evening for best results.", "temp": "28°C" },
+  "Dahod": { "lat": 22.8385, "lon": 74.2575, "season": "Kharif", "recommendedCrop": "Maize", "farmerTipNext2h": "Spray organic pest repellent in the evening.", "temp": "27°C" }
+};
 
 const translations = {
   en: {
@@ -108,7 +87,7 @@ const translations = {
     },
     nav: { crops: 'Your Crops', market: 'Market', schemes: 'Schemes', diagnose: 'Diagnose', you: 'You' },
     crops: { header: 'Your Farm', weatherTitle: 'Today\'s Weather', cropTitle: 'Recommended Crop', cropReason: (crop) => `Ideal conditions for ${crop}.`, weatherError: 'Could not fetch weather. Please check your location and API key.' },
-    market: { header: 'Market Prices', subtitle: 'Current rates in your local area', perQuintal: 'per quintal', marketError: 'Could not load market prices for your location.', noMarketData: 'No market data found for your selected crops in this location.' },
+    market: { header: 'Market Prices', subtitle: 'Live prices and trends', perQuintal: 'per quintal', marketError: 'Could not load market prices for your location.', noMarketData: 'No market data found for your selected crops in this location.' },
     schemes: {
       header: 'Government Schemes',
       schemesList: [
@@ -140,6 +119,15 @@ const translations = {
         clear: 'Diagnose Another',
         error: 'Sorry, I couldn\'t analyze this image. Please try another one.'
     },
+    offline: {
+        title: 'Offline Mode',
+        description: 'You are offline. Enter your phone number to get a basic crop recommendation via SMS.',
+        placeholder: 'Enter phone number',
+        button: 'Get Recommendation',
+        generating: 'Getting location & recommendation...',
+        sendSms: 'Send via SMS',
+        error: 'Could not get location. Please ensure location services are enabled.',
+    },
     systemInstruction: "You are 'KisanMitra', a friendly AI for Indian farmers. Respond in simple English. Use farmer-friendly emojis like 🌾, 🌱, 💧, ☀️, 🙏. Keep answers short.",
     explainScheme: (name) => `Explain the '${name}' scheme in simple terms.`,
   },
@@ -170,7 +158,7 @@ const translations = {
     },
     nav: { crops: 'आपकी फसलें', market: 'बाजार', schemes: 'योजनाएं', diagnose: 'निदान', you: 'आप' },
     crops: { header: 'आपका खेत', weatherTitle: 'आज का मौसम', cropTitle: 'अनुशंसित फसल', cropReason: (crop) => `${crop} के लिए आदर्श स्थितियाँ।`, weatherError: 'मौसम नहीं मिल सका। कृपया अपना स्थान और एपीआई कुंजी जांचें।' },
-    market: { header: 'बाजार मूल्य', subtitle: 'आपके स्थानीय क्षेत्र में वर्तमान दरें', perQuintal: 'प्रति क्विंटल', marketError: 'आपके स्थान के लिए बाजार मूल्य लोड नहीं किए जा सके।', noMarketData: 'इस स्थान पर आपके द्वारा चुनी गई फसलों के लिए कोई बाजार डेटा नहीं मिला।' },
+    market: { header: 'बाजार मूल्य', subtitle: 'लाइव मूल्य और रुझान', perQuintal: 'प्रति क्विंटल', marketError: 'आपके स्थान के लिए बाजार मूल्य लोड नहीं किए जा सके।', noMarketData: 'इस स्थान पर आपके द्वारा चुनी गई फसलों के लिए कोई बाजार डेटा नहीं मिला।' },
     schemes: {
       header: 'सरकारी योजनाएं',
       schemesList: [
@@ -202,6 +190,15 @@ const translations = {
         clear: 'दूसरा निदान करें',
         error: 'क्षमा करें, मैं इस छवि का विश्लेषण नहीं कर सका। कृपया दूसरी कोशिश करें।'
     },
+    offline: {
+        title: 'ऑफ़लाइन मोड',
+        description: 'आप ऑफ़लाइन हैं। SMS के माध्यम से फसल की सिफारिश पाने के लिए अपना फ़ोन नंबर दर्ज करें।',
+        placeholder: 'फ़ोन नंबर दर्ज करें',
+        button: 'सिफारिश प्राप्त करें',
+        generating: 'स्थान और सिफारिश प्राप्त हो रही है...',
+        sendSms: 'SMS द्वारा भेजें',
+        error: 'स्थान की जानकारी नहीं मिल सकी। कृपया सुनिश्चित करें कि लोकेशन सेवाएं सक्षम हैं।',
+    },
     systemInstruction: "आप 'किसानमित्र' हैं, भारतीय किसानों के लिए एक मित्र एआई। सरल हिंदी में जवाब दें। 🌾, 🌱, 💧, ☀️, 🙏 जैसे किसान-हितैषी इमोजी का प्रयोग करें। उत्तर संक्षिप्त रखें।",
     explainScheme: (name) => `'${name}' योजना को सरल शब्दों में समझाएं।`,
   },
@@ -232,7 +229,7 @@ const translations = {
     },
     nav: { crops: 'તમારા પાક', market: 'બજાર', schemes: 'યોજનાઓ', diagnose: 'નિદાન', you: 'તમે' },
     crops: { header: 'તમારું ખેતર', weatherTitle: 'આજનું હવામાન', cropTitle: 'ભલામણ કરેલ પાક', cropReason: (crop) => `${crop} માટે આદર્શ પરિસ્થિતિઓ.`, weatherError: 'હવામાન લાવી શકાયું નથી। કૃપા કરીને તમારું સ્થાન અને API કી તપાસો.' },
-    market: { header: 'બજાર ભાવ', subtitle: 'તમારા સ્થાનિક વિસ્તારમાં વર્તમાન દરો', perQuintal: 'પ્રતિ ક્વિન્ટલ', marketError: 'તમારા સ્થાન માટે બજાર ભાવ લોડ કરી શકાયા નથી।', noMarketData: 'આ સ્થાન પર તમારા પસંદ કરેલા પાક માટે કોઈ બજાર ડેટા મળ્યો નથી.' },
+    market: { header: 'બજાર ભાવ', subtitle: 'લાઇવ ભાવો અને વલણો', perQuintal: 'પ્રતિ ક્વિન્ટલ', marketError: 'તમારા સ્થાન માટે બજાર ભાવ લોડ કરી શકાયા નથી।', noMarketData: 'આ સ્થાન પર તમારા પસંદ કરેલા પાક માટે કોઈ બજાર ડેટા મળ્યો નથી.' },
     schemes: {
       header: 'સરકારી યોજનાઓ',
       schemesList: [
@@ -264,6 +261,15 @@ const translations = {
         clear: 'બીજું નિદાન કરો',
         error: 'માફ કરશો, હું આ છબીનું વિશ્લેષણ કરી શક્યો નથી. કૃપા કરીને બીજી છબીનો પ્રયાસ કરો.'
     },
+    offline: {
+        title: 'ઑફલાઇન મોડ',
+        description: 'તમે ઑફલાઇન છો. SMS દ્વારા પાકની ભલામણ મેળવવા માટે તમારો ફોન નંબર દાખલ કરો.',
+        placeholder: 'ફોન નંબર દાખલ કરો',
+        button: 'ભલામણ મેળવો',
+        generating: 'સ્થાન અને ભલામણ મેળવી રહ્યાં છીએ...',
+        sendSms: 'SMS દ્વારા મોકલો',
+        error: 'સ્થાન મેળવી શકાયું નથી। કૃપા કરીને ખાતરી કરો કે સ્થાન સેવાઓ સક્ષમ છે.',
+    },
     systemInstruction: "તમે 'કિસાનમિત્ર' છો, ભારતીય ખેડૂતો માટે મૈત્રીપૂર્ણ AI. સરળ ગુજરાતીમાં જવાબ આપો. 🌾, 🌱, 💧, ☀️, 🙏 જેવા ખેડૂત-મૈત્રીપૂર્ણ ઇમોજીનો ઉપયોગ કરો. જવાબો ટૂંકા રાખો.",
     explainScheme: (name) => `'${name}' યોજનાને સરળ શબ્દોમાં સમજાવો.`,
   },
@@ -284,6 +290,10 @@ const state = {
   diagnoseImageBase64: null as string | null,
   isDiagnosing: false,
   diagnoseResult: null as string | null,
+  isOnline: navigator.onLine,
+  offlineSmsNumber: '',
+  offlineSmsSummary: null as string | null,
+  isGeneratingSms: false,
 };
 
 const rootEl = document.getElementById('root');
@@ -291,6 +301,9 @@ const rootEl = document.getElementById('root');
 // --- RENDERING ---
 
 function renderCurrentView() {
+  if (!state.isOnline) {
+    return renderOfflineSmsPage();
+  }
   switch (state.appView) {
     case 'language':
       return renderLanguageSelector();
@@ -430,11 +443,11 @@ function renderCropCard(data, t) {
 function renderMarketPage(t) {
   const pageEl = document.getElementById('market');
   pageEl.innerHTML = `
-    <h1 class="page-header">${t.market.header}</h1>
-    <div class="card">
-      <p style="margin-bottom: 1rem; color: #555;">${t.market.subtitle}</p>
-      <div id="market-list"></div>
+    <div class="market-header">
+      <h1>${t.market.header}</h1>
+      <p>${t.market.subtitle}</p>
     </div>
+    <div id="market-list"></div>
   `;
   if (!state.marketData) {
     fetchMarketPrices();
@@ -456,12 +469,36 @@ function renderMarketList(data, t) {
         return;
     }
 
-    listEl.innerHTML = data.map(item => `
-        <div class="market-list-item">
-            <span class="crop-name">${item.crop}</span>
-            <span class="price">₹${item.price} / ${t.market.perQuintal}</span>
+    const trendUpIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17L9 11L13 15L21 7"/></svg>`;
+    const trendDownIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7L9 13L13 9L21 17"/></svg>`;
+
+    listEl.innerHTML = data.map(item => {
+        const trendClass = item.trend >= 0 ? 'trend-up' : 'trend-down';
+        const trendIcon = item.trend >= 0 ? trendUpIcon : trendDownIcon;
+        const trendSign = item.trend >= 0 ? '+' : '';
+        const formattedPrice = new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(item.price).replace('₹', '₹');
+
+        return `
+        <div class="market-price-card">
+            <div class="crop-info">
+                <span class="crop-name">${item.crop}</span>
+                <span class="unit">${t.market.perQuintal}</span>
+            </div>
+            <div class="price-info">
+                <span class="price">${formattedPrice}</span>
+                <div class="trend-indicator ${trendClass}">
+                    ${trendIcon}
+                    <span>${trendSign}${item.trend}%</span>
+                </div>
+            </div>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function renderSchemesPage(t) {
@@ -670,6 +707,46 @@ function renderLocationSelector() {
     });
 }
 
+function renderOfflineSmsPage() {
+    const t = translations[state.language] || translations.en;
+    let resultSection = '';
+
+    if (state.isGeneratingSms) {
+        resultSection = `<div class="loader"><div class="dot-flashing"></div></div><p>${t.offline.generating}</p>`;
+    } else if (state.offlineSmsSummary) {
+        resultSection = `
+            <pre class="sms-summary">${state.offlineSmsSummary}</pre>
+            <a href="sms:${state.offlineSmsNumber}?body=${encodeURIComponent(state.offlineSmsSummary)}" class="send-sms-link">${t.offline.sendSms}</a>
+        `;
+    }
+
+    rootEl.innerHTML = `
+        <div class="offline-page">
+            <div class="offline-card">
+                <h1>${t.offline.title}</h1>
+                <p>${t.offline.description}</p>
+                <div class="offline-form">
+                    <input type="tel" id="sms-phone-input" class="offline-input" placeholder="${t.offline.placeholder}" value="${state.offlineSmsNumber}" />
+                    <button id="generate-sms-btn" class="offline-btn" ${state.offlineSmsNumber.length < 10 ? 'disabled' : ''}>${t.offline.button}</button>
+                </div>
+                <div id="sms-result-section">
+                    ${resultSection}
+                </div>
+            </div>
+        </div>
+    `;
+
+    const phoneInput = document.getElementById('sms-phone-input') as HTMLInputElement;
+    const generateBtn = document.getElementById('generate-sms-btn') as HTMLButtonElement;
+
+    phoneInput.addEventListener('input', (e) => {
+        state.offlineSmsNumber = (e.target as HTMLInputElement).value;
+        generateBtn.disabled = state.offlineSmsNumber.length < 10;
+    });
+
+    generateBtn.addEventListener('click', handleGenerateSms);
+}
+
 // --- API & LOGIC ---
 
 function fileToBase64(file: File): Promise<{mimeType: string, data: string}> {
@@ -778,73 +855,68 @@ function fetchMarketPrices() {
     listEl.innerHTML = `<div class="loader"><div class="dot-flashing"></div></div>`;
     const t = translations[state.language];
 
-    setTimeout(() => { // Simulate async operation
-        try {
-            const locationParts = state.location.toLowerCase().split(',').map(p => p.trim());
-            let district = '';
-            let locationState = '';
+    try {
+        const locationParts = state.location.split(',').map(p => p.trim());
+        const city = locationParts[0];
 
-            if (locationParts.length > 1) {
-                district = locationParts[0];
-                locationState = locationParts[1];
-            } else {
-                district = locationParts[0];
-            }
-            
-            const locationData = marketDatabase.filter(record => {
-                const recordDistrict = record.district.toLowerCase();
-                const recordState = record.state.toLowerCase();
-                if (locationState) {
-                    return recordDistrict.includes(district) && recordState.includes(locationState);
+        const cropsToFetchEn = state.selectedCrops.map(langCrop => {
+            const langIndex = t.cropSelection.crops.findIndex(c => c.name === langCrop);
+            if (langIndex === -1) return null;
+            return translations.en.cropSelection.crops[langIndex].name.toLowerCase();
+        }).filter(Boolean);
+        
+        const formattedData = [];
+
+        for (const cropData of offlineCropPriceData.crops) {
+            if (cropsToFetchEn.includes(cropData.crop)) {
+                let pricePerKg = null;
+                let isCitySpecific = false;
+
+                // 1. Try to find a city-specific price
+                for (const cityNameKey in cropData.cities) {
+                    if (cityNameKey.toLowerCase() === city.toLowerCase()) {
+                        pricePerKg = cropData.cities[cityNameKey];
+                        isCitySpecific = true;
+                        break;
+                    }
                 }
-                return recordDistrict.includes(district);
-            });
 
-            if (locationData.length === 0) {
-                 state.marketData = { noData: true };
-                 render();
-                 return;
-            }
+                // 2. If no city price, fallback to state average
+                if (pricePerKg === null) {
+                    pricePerKg = cropData.state_avg_price_inr_per_kg;
+                    isCitySpecific = false;
+                }
 
-            const cropsToFetchLang = state.selectedCrops.length > 0
-                ? state.selectedCrops
-                : ['Wheat', 'Rice', 'Tomato'].map(enCrop => {
-                    const enIndex = translations.en.cropSelection.crops.findIndex(c => c.name === enCrop);
-                    return t.cropSelection.crops[enIndex].name;
-                });
-
-            const cropsToFetchEn = cropsToFetchLang.map(langCrop => {
-                 const langIndex = t.cropSelection.crops.findIndex(c => c.name === langCrop);
-                 return translations.en.cropSelection.crops[langIndex].name;
-            });
-            
-            const priceMap = new Map();
-
-            for (const record of locationData) {
-                const appCropEn = commodityMap[record.commodity];
-                if (appCropEn && cropsToFetchEn.includes(appCropEn) && !priceMap.has(appCropEn)) {
-                    const enIndex = translations.en.cropSelection.crops.findIndex(c => c.name === appCropEn);
+                if (pricePerKg !== null) {
+                    const pricePerQuintal = Math.round(pricePerKg * 100);
+                    const enIndex = translations.en.cropSelection.crops.findIndex(c => c.name.toLowerCase() === cropData.crop);
+                    
                     if (enIndex !== -1) {
                         const translatedCropName = t.cropSelection.crops[enIndex].name;
-                        priceMap.set(appCropEn, { crop: translatedCropName, price: record.modal_price });
+                         // Generate mock trend data for UI purposes
+                        const trend = Math.floor(Math.random() * 14) - 5; // -5% to +8%
+                        formattedData.push({
+                            crop: translatedCropName,
+                            price: pricePerQuintal,
+                            isAverage: !isCitySpecific,
+                            trend: trend
+                        });
                     }
                 }
             }
-
-            const formattedData = Array.from(priceMap.values());
-
-            if (formattedData.length === 0) {
-                state.marketData = { noData: true };
-            } else {
-                state.marketData = formattedData;
-            }
-
-        } catch (error) {
-            console.error("Failed to process market prices:", error);
-            state.marketData = { error: t.market.marketError };
         }
-        render();
-    }, 500); // Small delay to show loader
+
+        if (formattedData.length === 0) {
+            state.marketData = { noData: true };
+        } else {
+            state.marketData = formattedData;
+        }
+
+    } catch (error) {
+        console.error("Failed to process market prices:", error);
+        state.marketData = { error: t.market.marketError };
+    }
+    render();
 }
 
 
@@ -881,6 +953,36 @@ async function handleSendMessage(prompt) {
     if(sendBtn) sendBtn.disabled = false;
     (document.getElementById('chat-input') as HTMLInputElement).focus();
   }
+}
+
+function getGeolocation(): Promise<GeolocationPosition> {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error('Geolocation is not supported by your browser.'));
+        } else {
+            const options = {
+                enableHighAccuracy: false, // More reliable, less power-hungry
+                timeout: 15000,            // Increased timeout to 15 seconds
+                maximumAge: 0              // Don't use a cached position
+            };
+            navigator.geolocation.getCurrentPosition(resolve, reject, options);
+        }
+    });
+}
+
+function findNearestCity(lat: number, lon: number): { name: string; data: typeof offlineCityData[keyof typeof offlineCityData] } {
+    let nearestCity = null;
+    let minDistance = Infinity;
+
+    for (const cityName in offlineCityData) {
+        const city = offlineCityData[cityName];
+        const distance = Math.sqrt(Math.pow(city.lat - lat, 2) + Math.pow(city.lon - lon, 2));
+        if (distance < minDistance) {
+            minDistance = distance;
+            nearestCity = { name: cityName, data: city };
+        }
+    }
+    return nearestCity;
 }
 
 // --- EVENT HANDLERS ---
@@ -989,6 +1091,41 @@ function handleClearDiagnosis() {
     render();
 }
 
+async function handleGenerateSms() {
+    state.isGeneratingSms = true;
+    state.offlineSmsSummary = null;
+    renderOfflineSmsPage(); // Show loader
+
+    try {
+        const position = await getGeolocation();
+        const { latitude, longitude } = position.coords;
+        const nearest = findNearestCity(latitude, longitude);
+
+        const summary = [
+            `Farmer Check-In`,
+            `Time: ${new Date().toLocaleString()}`,
+            `Location: ${nearest.name} (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`,
+            `Weather: ${nearest.data.temp}`,
+            `Season: ${nearest.data.season}`,
+            `Recommended Crop: ${nearest.data.recommendedCrop}`,
+            `Tip: ${nearest.data.farmerTipNext2h}`
+        ].join('\n');
+
+        state.offlineSmsSummary = summary;
+    } catch (error) {
+        // Add more detailed logging for debugging geolocation errors
+        if (error instanceof GeolocationPositionError) {
+             console.error(`Geolocation error: Code ${error.code} - ${error.message}`);
+        } else {
+             console.error("Offline SMS generation failed:", error);
+        }
+        state.offlineSmsSummary = (translations[state.language] || translations.en).offline.error;
+    } finally {
+        state.isGeneratingSms = false;
+        renderOfflineSmsPage(); // Show result
+    }
+}
+
 function toggleChat(isOpen) {
   state.isChatOpen = isOpen;
   const overlay = document.querySelector('.chat-overlay');
@@ -1021,6 +1158,22 @@ function addEventListeners() {
 
 // --- INITIALIZATION ---
 function main() {
+  window.addEventListener('online', () => {
+    if (!state.isOnline) {
+      state.isOnline = true;
+      if (state.appView !== 'main_app') {
+          state.appView = 'language';
+      }
+      renderCurrentView();
+    }
+  });
+  window.addEventListener('offline', () => {
+    if (state.isOnline) {
+      state.isOnline = false;
+      renderCurrentView();
+    }
+  });
+
   renderCurrentView();
 }
 

@@ -1,0 +1,186 @@
+{
+  "metadata": {
+    "region": "Gujarat (demo values)",
+    "unit_price": "INR per kg",
+    "generated_for": "KisanMitra offline/demo dataset",
+    "disclaimer": "Demo/sample values for hackathon; not authoritative market data. Use for demo and offline flows only."
+  },
+  "crops": [
+    {
+      "crop": "rice",
+      "main_season": "Kharif",
+      "state_avg_price_inr_per_kg": 28,
+      "cities": {
+        "Ahmedabad": 29,
+        "Surat": 28.5,
+        "Rajkot": 27.5,
+        "Vadodara": 28.2
+      }
+    },
+    {
+      "crop": "wheat",
+      "main_season": "Rabi",
+      "state_avg_price_inr_per_kg": 24,
+      "cities": {
+        "Ahmedabad": 24.7,
+        "Surat": 24.5,
+        "Rajkot": 23.5,
+        "Vadodara": 24.2
+      }
+    },
+    {
+      "crop": "sugarcane",
+      "main_season": "Kharif",
+      "state_avg_price_inr_per_kg": 3.5,
+      "cities": {
+        "Ahmedabad": 3.6,
+        "Surat": 3.55,
+        "Rajkot": 3.4,
+        "Vadodara": 3.5
+      }
+    },
+    {
+      "crop": "cotton",
+      "main_season": "Kharif",
+      "state_avg_price_inr_per_kg": 200,
+      "cities": {
+        "Ahmedabad": 206,
+        "Surat": 204,
+        "Rajkot": 196,
+        "Vadodara": 202
+      }
+    },
+    {
+      "crop": "pulses",
+      "main_season": "Rabi/Kharif",
+      "state_avg_price_inr_per_kg": 90,
+      "cities": {
+        "Ahmedabad": 93,
+        "Surat": 92,
+        "Rajkot": 88,
+        "Vadodara": 91
+      }
+    },
+    {
+      "crop": "oilseeds",
+      "main_season": "Rabi/Kharif",
+      "state_avg_price_inr_per_kg": 80,
+      "cities": {
+        "Ahmedabad": 82,
+        "Surat": 81.5,
+        "Rajkot": 78,
+        "Vadodara": 81
+      }
+    },
+    {
+      "crop": "maize",
+      "main_season": "Kharif",
+      "state_avg_price_inr_per_kg": 18,
+      "cities": {
+        "Ahmedabad": 18.5,
+        "Surat": 18.3,
+        "Rajkot": 17.6,
+        "Vadodara": 18.2
+      }
+    },
+    {
+      "crop": "potato",
+      "main_season": "Rabi",
+      "state_avg_price_inr_per_kg": 12,
+      "cities": {
+        "Ahmedabad": 12.3,
+        "Surat": 12.2,
+        "Rajkot": 11.8,
+        "Vadodara": 12.1
+      }
+    },
+    {
+      "crop": "onion",
+      "main_season": "Kharif/Rabi",
+      "state_avg_price_inr_per_kg": 20,
+      "cities": {
+        "Ahmedabad": 20.6,
+        "Surat": 20.4,
+        "Rajkot": 19.6,
+        "Vadodara": 20.2
+      }
+    },
+    {
+      "crop": "tomato",
+      "main_season": "Summer/Kharif",
+      "state_avg_price_inr_per_kg": 22,
+      "cities": {
+        "Ahmedabad": 22.6,
+        "Surat": 22.4,
+        "Rajkot": 21.5,
+        "Vadodara": 22.2
+      }
+    },
+    {
+      "crop": "soyabean",
+      "main_season": "Kharif",
+      "state_avg_price_inr_per_kg": 45,
+      "cities": {
+        "Ahmedabad": 46,
+        "Surat": 45.8,
+        "Rajkot": 44,
+        "Vadodara": 45.5
+      }
+    },
+    {
+      "crop": "groundnut",
+      "main_season": "Kharif",
+      "state_avg_price_inr_per_kg": 85,
+      "cities": {
+        "Ahmedabad": 87.5,
+        "Surat": 86.5,
+        "Rajkot": 83,
+        "Vadodara": 85.8
+      }
+    },
+    {
+      "crop": "millets",
+      "main_season": "Kharif",
+      "state_avg_price_inr_per_kg": 25,
+      "cities": {
+        "Ahmedabad": 25.7,
+        "Surat": 25.5,
+        "Rajkot": 24.5,
+        "Vadodara": 25.2
+      }
+    },
+    {
+      "crop": "mango",
+      "main_season": "Summer",
+      "state_avg_price_inr_per_kg": 60,
+      "cities": {
+        "Ahmedabad": 61.8,
+        "Surat": 61.2,
+        "Rajkot": 58.8,
+        "Vadodara": 60.6
+      }
+    },
+    {
+      "crop": "banana",
+      "main_season": "Year-round",
+      "state_avg_price_inr_per_kg": 35,
+      "cities": {
+        "Ahmedabad": 36,
+        "Surat": 35.7,
+        "Rajkot": 34.3,
+        "Vadodara": 35.3
+      }
+    },
+    {
+      "crop": "tea",
+      "main_season": "Year-round",
+      "state_avg_price_inr_per_kg": 250,
+      "cities": {
+        "Ahmedabad": 257,
+        "Surat": 255,
+        "Rajkot": 245,
+        "Vadodara": 252
+      }
+    }
+  ]
+}

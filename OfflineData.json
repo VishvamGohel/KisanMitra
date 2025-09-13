@@ -1,0 +1,122 @@
+{
+  "Ahmedabad": {
+    "season": "Rabi",
+    "recommendedCrop": "Wheat",
+    "farmerTipNext2h": "Irrigate lightly in the evening to retain soil moisture.",
+    "temp": "30°C"
+  },
+  "Surat": {
+    "season": "Kharif",
+    "recommendedCrop": "Cotton",
+    "farmerTipNext2h": "Check for pest activity on leaves and apply neem spray if needed.",
+    "temp": "29°C"
+  },
+  "Rajkot": {
+    "season": "Rabi",
+    "recommendedCrop": "Groundnut",
+    "farmerTipNext2h": "Avoid overwatering, keep soil slightly dry for healthy pods.",
+    "temp": "32°C"
+  },
+  "Vadodara": {
+    "season": "Summer",
+    "recommendedCrop": "Maize",
+    "farmerTipNext2h": "Weed your maize field now for better growth this season.",
+    "temp": "34°C"
+  },
+  "Bhavnagar": {
+    "season": "Kharif",
+    "recommendedCrop": "Bajra",
+    "farmerTipNext2h": "Prepare soil for next sowing with light tilling.",
+    "temp": "31°C"
+  },
+  "Junagadh": {
+    "season": "Kharif",
+    "recommendedCrop": "Cotton",
+    "farmerTipNext2h": "Monitor for bollworm and remove infected bolls immediately.",
+    "temp": "28°C"
+  },
+  "Jamnagar": {
+    "season": "Rabi",
+    "recommendedCrop": "Wheat",
+    "farmerTipNext2h": "Apply fertilizer top-dressing before irrigation today.",
+    "temp": "29°C"
+  },
+  "Gandhinagar": {
+    "season": "Summer",
+    "recommendedCrop": "Vegetables (Okra)",
+    "farmerTipNext2h": "Harvest ripe okra pods in the early morning.",
+    "temp": "33°C"
+  },
+  "Anand": {
+    "season": "Rabi",
+    "recommendedCrop": "Rice",
+    "farmerTipNext2h": "Drain excess water from rice field if standing.",
+    "temp": "27°C"
+  },
+  "Nadiad": {
+    "season": "Summer",
+    "recommendedCrop": "Maize",
+    "farmerTipNext2h": "Apply organic compost for soil health improvement.",
+    "temp": "34°C"
+  },
+  "Bharuch": {
+    "season": "Kharif",
+    "recommendedCrop": "Sugarcane",
+    "farmerTipNext2h": "Check sugarcane shoots for early stem borer damage.",
+    "temp": "30°C"
+  },
+  "Navsari": {
+    "season": "Kharif",
+    "recommendedCrop": "Rice",
+    "farmerTipNext2h": "Spray fungicide if you observe leaf spot symptoms.",
+    "temp": "28°C"
+  },
+  "Valsad": {
+    "season": "Kharif",
+    "recommendedCrop": "Banana",
+    "farmerTipNext2h": "Support banana plants with bamboo to avoid wind damage.",
+    "temp": "30°C"
+  },
+  "Porbandar": {
+    "season": "Summer",
+    "recommendedCrop": "Groundnut",
+    "farmerTipNext2h": "Check soil moisture; irrigate if cracks appear.",
+    "temp": "33°C"
+  },
+  "Mehsana": {
+    "season": "Rabi",
+    "recommendedCrop": "Mustard",
+    "farmerTipNext2h": "Remove weeds now to avoid competition for nutrients.",
+    "temp": "26°C"
+  },
+  "Palanpur": {
+    "season": "Rabi",
+    "recommendedCrop": "Cumin",
+    "farmerTipNext2h": "Thin seedlings to improve spacing and yield.",
+    "temp": "25°C"
+  },
+  "Bhuj": {
+    "season": "Summer",
+    "recommendedCrop": "Millets",
+    "farmerTipNext2h": "Mulch the soil to preserve moisture in hot weather.",
+    "temp": "36°C"
+  },
+  "Morbi": {
+    "season": "Rabi",
+    "recommendedCrop": "Cotton",
+    "farmerTipNext2h": "Clean fallen leaves around plants to prevent pests.",
+    "temp": "31°C"
+  },
+  "Patan": {
+    "season": "Rabi",
+    "recommendedCrop": "Wheat",
+    "farmerTipNext2h": "Irrigate wheat field in the evening for best results.",
+    "temp": "28°C"
+  },
+  "Dahod": {
+    "season": "Kharif",
+    "recommendedCrop": "Maize",
+    "farmerTipNext2h": "Spray organic pest repellent in the evening.",
+    "temp": "27°C"
+  }
+}
