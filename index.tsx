@@ -1,12 +1,10 @@
-
-import { GoogleGenAI, Chat } from "@google/genai";
+import { GoogleGenAI, Chat, Type } from "@google/genai";
 import { marked } from 'marked';
 
 // TODO: Replace with your actual WeatherAPI.com API key
 const WEATHER_API_KEY = '4522ecbfce5d46fab22115230251309';
 
-// TODO: Replace 'YOUR_GOOGLE_GENAI_API_KEY' with your actual API key or use a secure method to inject it
-const ai = new GoogleGenAI({apiKey: 'AIzaSyCvEfS-nRy8q1Bpx2SQiRIXzoKdVdjKMOA'});
+const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
 let chat: Chat;
 
 const offlineCropPriceData = {
@@ -17,10 +15,10 @@ const offlineCropPriceData = {
     "disclaimer": "Demo/sample values for hackathon; not authoritative market data. Use for demo and offline flows only."
   },
   "crops": [
-    { "crop": "rice", "main_season": "Kharif", "state_avg_price_inr_per_kg": 28, "cities": { "Ahmedabad": 29, "Surat": 28.5, "Rajkot": 27.5, "Vadodara": 28.2 } },
-    { "crop": "wheat", "main_season": "Rabi", "state_avg_price_inr_per_kg": 24, "cities": { "Ahmedabad": 24.7, "Surat": 24.5, "Rajkot": 23.5, "Vadodara": 24.2 } },
+    { "crop": "rice", "main_season": "Kharif", "state_avg_price_inr_per_kg": 18.5, "cities": { "Ahmedabad": 19, "Surat": 18.5, "Rajkot": 18, "Vadodara": 18.2 } },
+    { "crop": "wheat", "main_season": "Rabi", "state_avg_price_inr_per_kg": 21, "cities": { "Ahmedabad": 21.5, "Surat": 21.2, "Rajkot": 20.5, "Vadodara": 21 } },
     { "crop": "sugarcane", "main_season": "Kharif", "state_avg_price_inr_per_kg": 3.5, "cities": { "Ahmedabad": 3.6, "Surat": 3.55, "Rajkot": 3.4, "Vadodara": 3.5 } },
-    { "crop": "cotton", "main_season": "Kharif", "state_avg_price_inr_per_kg": 200, "cities": { "Ahmedabad": 206, "Surat": 204, "Rajkot": 196, "Vadodara": 202 } },
+    { "crop": "cotton", "main_season": "Kharif", "state_avg_price_inr_per_kg": 52, "cities": { "Ahmedabad": 53, "Surat": 52.5, "Rajkot": 51, "Vadodara": 52 } },
     { "crop": "pulses", "main_season": "Rabi/Kharif", "state_avg_price_inr_per_kg": 90, "cities": { "Ahmedabad": 93, "Surat": 92, "Rajkot": 88, "Vadodara": 91 } },
     { "crop": "oilseeds", "main_season": "Rabi/Kharif", "state_avg_price_inr_per_kg": 80, "cities": { "Ahmedabad": 82, "Surat": 81.5, "Rajkot": 78, "Vadodara": 81 } },
     { "crop": "maize", "main_season": "Kharif", "state_avg_price_inr_per_kg": 18, "cities": { "Ahmedabad": 18.5, "Surat": 18.3, "Rajkot": 17.6, "Vadodara": 18.2 } },
@@ -37,26 +35,12 @@ const offlineCropPriceData = {
 };
 
 const offlineCityData = {
-  "Ahmedabad": { "lat": 23.0225, "lon": 72.5714, "season": "Rabi", "recommendedCrop": "Wheat", "farmerTipNext2h": "Irrigate lightly in the evening to retain soil moisture.", "temp": "30°C" },
-  "Surat": { "lat": 21.1702, "lon": 72.8311, "season": "Kharif", "recommendedCrop": "Cotton", "farmerTipNext2h": "Check for pest activity on leaves and apply neem spray if needed.", "temp": "29°C" },
-  "Rajkot": { "lat": 22.3039, "lon": 70.8022, "season": "Rabi", "recommendedCrop": "Groundnut", "farmerTipNext2h": "Avoid overwatering, keep soil slightly dry for healthy pods.", "temp": "32°C" },
-  "Vadodara": { "lat": 22.3072, "lon": 73.1812, "season": "Summer", "recommendedCrop": "Maize", "farmerTipNext2h": "Weed your maize field now for better growth this season.", "temp": "34°C" },
-  "Bhavnagar": { "lat": 21.7645, "lon": 72.1519, "season": "Kharif", "recommendedCrop": "Bajra", "farmerTipNext2h": "Prepare soil for next sowing with light tilling.", "temp": "31°C" },
-  "Junagadh": { "lat": 21.5222, "lon": 70.4579, "season": "Kharif", "recommendedCrop": "Cotton", "farmerTipNext2h": "Monitor for bollworm and remove infected bolls immediately.", "temp": "28°C" },
-  "Jamnagar": { "lat": 22.4707, "lon": 70.0577, "season": "Rabi", "recommendedCrop": "Wheat", "farmerTipNext2h": "Apply fertilizer top-dressing before irrigation today.", "temp": "29°C" },
-  "Gandhinagar": { "lat": 23.2156, "lon": 72.6369, "season": "Summer", "recommendedCrop": "Vegetables (Okra)", "farmerTipNext2h": "Harvest ripe okra pods in the early morning.", "temp": "33°C" },
-  "Anand": { "lat": 22.5645, "lon": 72.9284, "season": "Rabi", "recommendedCrop": "Rice", "farmerTipNext2h": "Drain excess water from rice field if standing.", "temp": "27°C" },
-  "Nadiad": { "lat": 22.6953, "lon": 72.8617, "season": "Summer", "recommendedCrop": "Maize", "farmerTipNext2h": "Apply organic compost for soil health improvement.", "temp": "34°C" },
-  "Bharuch": { "lat": 21.7051, "lon": 72.9959, "season": "Kharif", "recommendedCrop": "Sugarcane", "farmerTipNext2h": "Check sugarcane shoots for early stem borer damage.", "temp": "30°C" },
-  "Navsari": { "lat": 20.9520, "lon": 72.9323, "season": "Kharif", "recommendedCrop": "Rice", "farmerTipNext2h": "Spray fungicide if you observe leaf spot symptoms.", "temp": "28°C" },
-  "Valsad": { "lat": 20.6300, "lon": 72.9333, "season": "Kharif", "recommendedCrop": "Banana", "farmerTipNext2h": "Support banana plants with bamboo to avoid wind damage.", "temp": "30°C" },
-  "Porbandar": { "lat": 21.6417, "lon": 69.6293, "season": "Summer", "recommendedCrop": "Groundnut", "farmerTipNext2h": "Check soil moisture; irrigate if cracks appear.", "temp": "33°C" },
-  "Mehsana": { "lat": 23.5891, "lon": 72.3693, "season": "Rabi", "recommendedCrop": "Mustard", "farmerTipNext2h": "Remove weeds now to avoid competition for nutrients.", "temp": "26°C" },
-  "Palanpur": { "lat": 24.1724, "lon": 72.4333, "season": "Rabi", "recommendedCrop": "Cumin", "farmerTipNext2h": "Thin seedlings to improve spacing and yield.", "temp": "25°C" },
-  "Bhuj": { "lat": 23.2530, "lon": 69.6667, "season": "Summer", "recommendedCrop": "Millets", "farmerTipNext2h": "Mulch the soil to preserve moisture in hot weather.", "temp": "36°C" },
-  "Morbi": { "lat": 22.8225, "lon": 70.8265, "season": "Rabi", "recommendedCrop": "Cotton", "farmerTipNext2h": "Clean fallen leaves around plants to prevent pests.", "temp": "31°C" },
-  "Patan": { "lat": 23.8493, "lon": 72.1266, "season": "Rabi", "recommendedCrop": "Wheat", "farmerTipNext2h": "Irrigate wheat field in the evening for best results.", "temp": "28°C" },
-  "Dahod": { "lat": 22.8385, "lon": 74.2575, "season": "Kharif", "recommendedCrop": "Maize", "farmerTipNext2h": "Spray organic pest repellent in the evening.", "temp": "27°C" }
+  'Pune': { lat: 18.5204, lon: 73.8567, season: 'Rabi', crop: 'Wheat' },
+  'Nagpur': { lat: 21.1458, lon: 79.0882, season: 'Kharif', crop: 'Cotton' },
+  'Nashik': { lat: 20.0112, lon: 73.7909, season: 'Rabi', crop: 'Onion' },
+  'Jaipur': { lat: 26.9124, lon: 75.7873, season: 'Rabi', crop: 'Mustard' },
+  'Lucknow': { lat: 26.8467, lon: 80.9462, season: 'Rabi', crop: 'Wheat' },
+  'Patna': { lat: 25.5941, lon: 85.1376, season: 'Kharif', crop: 'Rice' },
 };
 
 const translations = {
@@ -72,7 +56,7 @@ const translations = {
       counter: (count) => `${count}/8`,
       crops: [
         { name: 'Rice', emoji: '🍚' }, { name: 'Wheat', emoji: '🌾' }, { name: 'Sugarcane', emoji: '🎋' },
-        { name: 'Cotton', emoji: '⚪' }, { name: 'Pulses', emoji: '🫘' }, { name: 'Oilseeds', emoji: '🌼' },
+        { name: 'Cotton', emoji: '⚪' }, { name: 'Pulses', emoji: '🟡' }, { name: 'Oilseeds', emoji: '🌼' },
         { name: 'Maize', emoji: '🌽' }, { name: 'Potato', emoji: '🥔' }, { name: 'Onion', emoji: '🧅' },
         { name: 'Tomato', emoji: '🍅' }, { name: 'Soybean', emoji: '🌱' }, { name: 'Groundnut', emoji: '🥜' },
         { name: 'Millets', emoji: '🌾' }, { name: 'Mango', emoji: '🥭' }, { name: 'Banana', emoji: '🍌' },
@@ -86,7 +70,7 @@ const translations = {
         confirm: 'Confirm Location',
     },
     nav: { crops: 'Your Crops', market: 'Market', schemes: 'Schemes', diagnose: 'Diagnose', you: 'You' },
-    crops: { header: 'Your Farm', weatherTitle: 'Today\'s Weather', cropTitle: 'Recommended Crop', cropReason: (crop) => `Ideal conditions for ${crop}.`, weatherError: 'Could not fetch weather. Please check your location and API key.' },
+    crops: { header: 'Your Farm', weatherTitle: 'Today\'s Weather', cropTitle: 'Recommended Crop', cropReason: (crop) => `Ideal conditions for ${crop}.`, weatherError: 'Could not fetch weather. Please check your location and API key.', aiError: 'Could not get AI recommendation. Showing default.' },
     market: { header: 'Market Prices', subtitle: 'Live prices and trends', perQuintal: 'per quintal', marketError: 'Could not load market prices for your location.', noMarketData: 'No market data found for your selected crops in this location.' },
     schemes: {
       header: 'Government Schemes',
@@ -108,6 +92,15 @@ const translations = {
       myCrops: 'My Crops',
       noRecommendation: 'None yet',
       switchLanguage: 'Switch Language',
+      farmDetails: 'Farm Details',
+      landSize: 'Land Size (Acres)',
+      soilType: 'Soil Type',
+      irrigation: 'Irrigation Method',
+      options: {
+        landSize: ['Select...', '< 1', '1 - 5', '> 5'],
+        soilType: ['Select...', 'Alluvial', 'Black', 'Red', 'Laterite', 'Sandy', 'Clay'],
+        irrigation: ['Select...', 'Drip', 'Sprinkler', 'Canal', 'Well/Borewell', 'Rain-fed']
+      }
     },
     chat: { title: 'AI Assistant', placeholder: 'Ask a question...', send: 'Send' },
     diagnose: {
@@ -143,7 +136,7 @@ const translations = {
       counter: (count) => `${count}/8`,
       crops: [
         { name: 'चावल', emoji: '🍚' }, { name: 'गेहूँ', emoji: '🌾' }, { name: 'गन्ना', emoji: '🎋' },
-        { name: 'कपास', emoji: '⚪' }, { name: 'दालें', emoji: '🫘' }, { name: 'तिलहन', emoji: '🌼' },
+        { name: 'कपास', emoji: '⚪' }, { name: 'दालें', emoji: '🟡' }, { name: 'तिलहन', emoji: '🌼' },
         { name: 'मक्का', emoji: '🌽' }, { name: 'आलू', emoji: '🥔' }, { name: 'प्याज', emoji: '🧅' },
         { name: 'टमाटर', emoji: '🍅' }, { name: 'सोयाबीन', emoji: '🌱' }, { name: 'मूँगफली', emoji: '🥜' },
         { name: 'बाजरा', emoji: '🌾' }, { name: 'आम', emoji: '🥭' }, { name: 'केला', emoji: '🍌' },
@@ -157,7 +150,7 @@ const translations = {
         confirm: 'स्थान की पुष्टि करें',
     },
     nav: { crops: 'आपकी फसलें', market: 'बाजार', schemes: 'योजनाएं', diagnose: 'निदान', you: 'आप' },
-    crops: { header: 'आपका खेत', weatherTitle: 'आज का मौसम', cropTitle: 'अनुशंसित फसल', cropReason: (crop) => `${crop} के लिए आदर्श स्थितियाँ।`, weatherError: 'मौसम नहीं मिल सका। कृपया अपना स्थान और एपीआई कुंजी जांचें।' },
+    crops: { header: 'आपका खेत', weatherTitle: 'आज का मौसम', cropTitle: 'अनुशंसित फसल', cropReason: (crop) => `${crop} के लिए आदर्श स्थितियाँ।`, weatherError: 'मौसम नहीं मिल सका। कृपया अपना स्थान और एपीआई कुंजी जांचें।', aiError: 'एआई सिफारिश नहीं मिल सकी। डिफ़ॉल्ट दिखाया जा रहा है।' },
     market: { header: 'बाजार मूल्य', subtitle: 'लाइव मूल्य और रुझान', perQuintal: 'प्रति क्विंटल', marketError: 'आपके स्थान के लिए बाजार मूल्य लोड नहीं किए जा सके।', noMarketData: 'इस स्थान पर आपके द्वारा चुनी गई फसलों के लिए कोई बाजार डेटा नहीं मिला।' },
     schemes: {
       header: 'सरकारी योजनाएं',
@@ -179,6 +172,15 @@ const translations = {
       myCrops: 'मेरी फसलें',
       noRecommendation: 'अभी तक कोई नहीं',
       switchLanguage: 'भाषा बदलें',
+      farmDetails: 'खेत का विवरण',
+      landSize: 'भूमि का आकार (एकड़)',
+      soilType: 'मिट्टी का प्रकार',
+      irrigation: 'सिंचाई विधि',
+      options: {
+        landSize: ['चुनें...', '< 1', '1 - 5', '> 5'],
+        soilType: ['चुनें...', 'जलोढ़', 'काली', 'लाल', 'लैटेराइट', 'रेतीली', 'चिकनी'],
+        irrigation: ['चुनें...', 'ड्रिप', 'स्प्रिंकलर', 'नहर', 'कुआं/बोरवेल', 'वर्षा-आधारित']
+      }
     },
     chat: { title: 'एआई सहायक', placeholder: 'एक सवाल पूछें...', send: 'भेजें' },
     diagnose: {
@@ -214,7 +216,7 @@ const translations = {
       counter: (count) => `${count}/8`,
       crops: [
         { name: 'ચોખા', emoji: '🍚' }, { name: 'ઘઉં', emoji: '🌾' }, { name: 'શેરડી', emoji: '🎋' },
-        { name: 'કપાસ', emoji: '⚪' }, { name: 'કઠોળ', emoji: '🫘' }, { name: 'તેલીબિયાં', emoji: '🌼' },
+        { name: 'કપાસ', emoji: '⚪' }, { name: 'કઠોળ', emoji: '🟡' }, { name: 'તેલીબિયાં', emoji: '🌼' },
         { name: 'મકાઈ', emoji: '🌽' }, { name: 'બટાકા', emoji: '🥔' }, { name: 'ડુંગળી', emoji: '🧅' },
         { name: 'ટામેટા', emoji: '🍅' }, { name: 'સોયાબીન', emoji: '🌱' }, { name: 'મગફળી', emoji: '🥜' },
         { name: 'બાજરી', emoji: '🌾' }, { name: 'કેરી', emoji: '🥭' }, { name: 'કેળા', emoji: '🍌' },
@@ -228,7 +230,7 @@ const translations = {
         confirm: 'સ્થાનની પુષ્ટિ કરો',
     },
     nav: { crops: 'તમારા પાક', market: 'બજાર', schemes: 'યોજનાઓ', diagnose: 'નિદાન', you: 'તમે' },
-    crops: { header: 'તમારું ખેતર', weatherTitle: 'આજનું હવામાન', cropTitle: 'ભલામણ કરેલ પાક', cropReason: (crop) => `${crop} માટે આદર્શ પરિસ્થિતિઓ.`, weatherError: 'હવામાન લાવી શકાયું નથી। કૃપા કરીને તમારું સ્થાન અને API કી તપાસો.' },
+    crops: { header: 'તમારું ખેતર', weatherTitle: 'આજનું હવામાન', cropTitle: 'ભલામણ કરેલ પાક', cropReason: (crop) => `${crop} માટે આદર્શ પરિસ્થિતિઓ.`, weatherError: 'હવામાન લાવી શકાયું નથી। કૃપા કરીને તમારું સ્થાન અને API કી તપાસો.', aiError: 'AI ભલામણ મેળવી શકાઈ નથી. ડિફૉલ્ટ બતાવી રહ્યું છે.' },
     market: { header: 'બજાર ભાવ', subtitle: 'લાઇવ ભાવો અને વલણો', perQuintal: 'પ્રતિ ક્વિન્ટલ', marketError: 'તમારા સ્થાન માટે બજાર ભાવ લોડ કરી શકાયા નથી।', noMarketData: 'આ સ્થાન પર તમારા પસંદ કરેલા પાક માટે કોઈ બજાર ડેટા મળ્યો નથી.' },
     schemes: {
       header: 'સરકારી યોજનાઓ',
@@ -250,6 +252,15 @@ const translations = {
       myCrops: 'મારા પાક',
       noRecommendation: 'હજી સુધી કોઈ નથી',
       switchLanguage: 'ભાષા બદલો',
+      farmDetails: 'ખેતરની વિગતો',
+      landSize: 'જમીનનું કદ (એકર)',
+      soilType: 'માટીનો પ્રકાર',
+      irrigation: 'સિંચાઈ પદ્ધતિ',
+      options: {
+        landSize: ['પસંદ કરો...', '< 1', '1 - 5', '> 5'],
+        soilType: ['પસંદ કરો...', 'કાંપવાળી', 'કાળી', 'લાલ', 'પડખાઉ', 'રેતાળ', 'માટીવાળી'],
+        irrigation: ['પસંદ કરો...', 'ટપક', 'ફુવારો', 'નહેર', 'કૂવો/બોરવેલ', 'વરસાદ આધારિત']
+      }
     },
     chat: { title: 'એઆઈ સહાયક', placeholder: 'એક પ્રશ્ન પૂછો...', send: 'મોકલો' },
      diagnose: {
@@ -294,6 +305,9 @@ const state = {
   offlineSmsNumber: '',
   offlineSmsSummary: null as string | null,
   isGeneratingSms: false,
+  farmLandSize: null as string | null,
+  farmSoilType: null as string | null,
+  farmIrrigation: null as string | null,
 };
 
 const rootEl = document.getElementById('root');
@@ -354,11 +368,26 @@ function renderAppShell() {
       <button class="fab-chat" id="fab-chat-btn" aria-label="${t.chat.title}">💬</button>
       
       <nav class="bottom-nav">
-        <button class="nav-btn" data-tab="crops" aria-label="${t.nav.crops}"><span class="icon">🌾</span><span class="label">${t.nav.crops}</span></button>
-        <button class="nav-btn" data-tab="market" aria-label="${t.nav.market}"><span class="icon">🏪</span><span class="label">${t.nav.market}</span></button>
-        <button class="nav-btn" data-tab="schemes" aria-label="${t.nav.schemes}"><span class="icon">📜</span><span class="label">${t.nav.schemes}</span></button>
-        <button class="nav-btn" data-tab="diagnose" aria-label="${t.nav.diagnose}"><span class="icon">🩺</span><span class="label">${t.nav.diagnose}</span></button>
-        <button class="nav-btn" data-tab="you" aria-label="${t.nav.you}"><span class="icon">👤</span><span class="label">${t.nav.you}</span></button>
+        <button class="nav-btn" data-tab="crops" aria-label="${t.nav.crops}">
+            <span class="icon">🌿</span>
+            <span class="label">${t.nav.crops}</span>
+        </button>
+        <button class="nav-btn" data-tab="market" aria-label="${t.nav.market}">
+            <span class="icon">📈</span>
+            <span class="label">${t.nav.market}</span>
+        </button>
+        <button class="nav-btn" data-tab="schemes" aria-label="${t.nav.schemes}">
+            <span class="icon">📜</span>
+            <span class="label">${t.nav.schemes}</span>
+        </button>
+        <button class="nav-btn" data-tab="diagnose" aria-label="${t.nav.diagnose}">
+            <span class="icon">🔬</span>
+            <span class="label">${t.nav.diagnose}</span>
+        </button>
+        <button class="nav-btn" data-tab="you" aria-label="${t.nav.you}">
+            <span class="icon">👤</span>
+            <span class="label">${t.nav.you}</span>
+        </button>
       </nav>
       
       <div class="chat-overlay">
@@ -433,7 +462,7 @@ function renderCropCard(data, t) {
         <div class="icon">🌱</div>
         <div>
           <p class="crop-name">${data.crop}</p>
-          <p class="reason">${t.crops.cropReason(data.crop)}</p>
+          <p class="reason">${data.reason}</p>
         </div>
       </div>
     </div>
@@ -443,11 +472,11 @@ function renderCropCard(data, t) {
 function renderMarketPage(t) {
   const pageEl = document.getElementById('market');
   pageEl.innerHTML = `
-    <div class="market-header">
-      <h1>${t.market.header}</h1>
-      <p>${t.market.subtitle}</p>
+    <h1 class="page-header">${t.market.header}</h1>
+    <div class="card-transparent">
+      <p class="page-subtitle">${t.market.subtitle}</p>
+      <div id="market-list"></div>
     </div>
-    <div id="market-list"></div>
   `;
   if (!state.marketData) {
     fetchMarketPrices();
@@ -469,29 +498,23 @@ function renderMarketList(data, t) {
         return;
     }
 
-    const trendUpIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17L9 11L13 15L21 7"/></svg>`;
-    const trendDownIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7L9 13L13 9L21 17"/></svg>`;
-
     listEl.innerHTML = data.map(item => {
-        const trendClass = item.trend >= 0 ? 'trend-up' : 'trend-down';
-        const trendIcon = item.trend >= 0 ? trendUpIcon : trendDownIcon;
-        const trendSign = item.trend >= 0 ? '+' : '';
-        const formattedPrice = new Intl.NumberFormat('en-IN', {
-            style: 'currency',
-            currency: 'INR',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(item.price).replace('₹', '₹');
+        const isPositive = item.trend >= 0;
+        const trendClass = isPositive ? 'positive' : 'negative';
+        const trendSign = isPositive ? '+' : '';
+        const trendIcon = isPositive 
+            ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 12L12 4L20 12H4Z"></path></svg>`
+            : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 12L12 20L4 12H20Z"></path></svg>`;
 
         return `
         <div class="market-price-card">
-            <div class="crop-info">
+            <div class="crop-details">
                 <span class="crop-name">${item.crop}</span>
-                <span class="unit">${t.market.perQuintal}</span>
+                <span class="per-quintal">${t.market.perQuintal}</span>
             </div>
-            <div class="price-info">
-                <span class="price">${formattedPrice}</span>
-                <div class="trend-indicator ${trendClass}">
+            <div class="price-details">
+                <span class="price">₹${item.price.toLocaleString('en-IN')}</span>
+                <div class="trend ${trendClass}">
                     ${trendIcon}
                     <span>${trendSign}${item.trend}%</span>
                 </div>
@@ -568,6 +591,11 @@ function renderDiagnosePage(t) {
 function renderProfilePage(t) {
   const pageEl = document.getElementById('you');
   const langMap = { en: 'English', hi: 'हिन्दी', gu: 'ગુજરાતી' };
+
+  const landSizeOptions = t.profile.options.landSize.map(opt => `<option value="${opt}" ${state.farmLandSize === opt ? 'selected' : ''}>${opt}</option>`).join('');
+  const soilTypeOptions = t.profile.options.soilType.map(opt => `<option value="${opt}" ${state.farmSoilType === opt ? 'selected' : ''}>${opt}</option>`).join('');
+  const irrigationOptions = t.profile.options.irrigation.map(opt => `<option value="${opt}" ${state.farmIrrigation === opt ? 'selected' : ''}>${opt}</option>`).join('');
+
   pageEl.innerHTML = `
     <h1 class="page-header">${t.profile.header}</h1>
     <div class="card">
@@ -589,6 +617,21 @@ function renderProfilePage(t) {
       </div>
     </div>
     <div class="card">
+        <h2 class="card-title">${t.profile.farmDetails}</h2>
+        <div class="profile-info-item">
+            <label for="land-size-select" class="label">${t.profile.landSize}</label>
+            <select id="land-size-select" class="profile-select">${landSizeOptions}</select>
+        </div>
+        <div class="profile-info-item">
+            <label for="soil-type-select" class="label">${t.profile.soilType}</label>
+            <select id="soil-type-select" class="profile-select">${soilTypeOptions}</select>
+        </div>
+        <div class="profile-info-item">
+            <label for="irrigation-select" class="label">${t.profile.irrigation}</label>
+            <select id="irrigation-select" class="profile-select">${irrigationOptions}</select>
+        </div>
+    </div>
+    <div class="card">
         <h2 class="card-title">${t.profile.myCrops}</h2>
         <div class="my-crops-list">
             ${state.selectedCrops.length > 0 ? state.selectedCrops.map(c => `<span>${c}</span>`).join(', ') : 'No crops selected.'}
@@ -596,6 +639,20 @@ function renderProfilePage(t) {
     </div>
     <button class="switch-lang-btn" id="switch-lang-btn">${t.profile.switchLanguage}</button>
   `;
+
+  document.getElementById('land-size-select')?.addEventListener('change', (e) => {
+    state.farmLandSize = (e.target as HTMLSelectElement).value;
+    state.weatherData = null; // Invalidate current recommendation
+  });
+  document.getElementById('soil-type-select')?.addEventListener('change', (e) => {
+    state.farmSoilType = (e.target as HTMLSelectElement).value;
+    state.weatherData = null; // Invalidate current recommendation
+  });
+  document.getElementById('irrigation-select')?.addEventListener('change', (e) => {
+    state.farmIrrigation = (e.target as HTMLSelectElement).value;
+    state.weatherData = null; // Invalidate current recommendation
+  });
+
   document.getElementById('switch-lang-btn')?.addEventListener('click', () => {
     state.appView = 'language';
     renderCurrentView();
@@ -817,6 +874,82 @@ function getWeatherEmojiFromCode(code) {
     return emojiMap[code] || '🌍';
 }
 
+async function getAiCropRecommendation(weather, location, interestedCrops) {
+    const t = translations[state.language];
+    // Translate selected crops to English for the model
+    const cropsToFetchEn = interestedCrops.map(langCrop => {
+        const langIndex = t.cropSelection.crops.findIndex(c => c.name === langCrop);
+        return translations.en.cropSelection.crops[langIndex].name;
+    });
+
+    const farmDetails = [];
+    if (state.farmLandSize && state.farmLandSize !== t.profile.options.landSize[0]) {
+      farmDetails.push(`- Land Size: ${state.farmLandSize} acres`);
+    }
+    if (state.farmSoilType && state.farmSoilType !== t.profile.options.soilType[0]) {
+      farmDetails.push(`- Soil Type: ${state.farmSoilType}`);
+    }
+    if (state.farmIrrigation && state.farmIrrigation !== t.profile.options.irrigation[0]) {
+      farmDetails.push(`- Irrigation Method: ${state.farmIrrigation}`);
+    }
+    const farmDetailsPrompt = farmDetails.length > 0 ? `\nFarmer's farm details:\n${farmDetails.join('\n')}` : '';
+
+
+    const prompt = `You are an expert agricultural advisor for Indian farmers. Your goal is to give advice that is extremely simple and easy to understand. Talk like you are speaking to a local farmer.
+
+    Based on the following information, recommend the single best crop to grow right now.
+    - Location: ${location}
+    - Current Temperature: ${weather.temp}°C
+    - Current Condition: ${weather.condition}
+    - Farmer is interested in these crops: ${cropsToFetchEn.join(', ')}
+    ${farmDetailsPrompt}
+
+    Your task:
+    1.  Analyze the location, weather, and the farmer's specific farm details (if provided).
+    2.  From the farmer's list of interested crops, choose the ONE that is most suitable to plant or tend to right now.
+    3.  Provide a very short, simple reason for your choice in the user's language (${state.language}). **IMPORTANT: Use very simple words, as if explaining to someone with little formal education. For example, instead of 'ideal for germination', say 'good for planting seeds'.**
+    
+    Return your answer in JSON format only.`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.OBJECT,
+                    properties: {
+                        crop: {
+                            type: Type.STRING,
+                            description: "The single recommended crop name, in English."
+                        },
+                        reason: {
+                            type: Type.STRING,
+                            description: `A short, simple, one-sentence explanation for the recommendation in the user's language (${state.language}), using very simple, farmer-friendly vocabulary.`
+                        }
+                    }
+                },
+            },
+        });
+
+        const jsonResponse = JSON.parse(response.text);
+        
+        // Translate crop name back to user's language
+        const enIndex = translations.en.cropSelection.crops.findIndex(c => c.name.toLowerCase() === jsonResponse.crop.toLowerCase());
+        if (enIndex !== -1) {
+            jsonResponse.crop = t.cropSelection.crops[enIndex].name;
+        }
+
+        return jsonResponse;
+
+    } catch (error) {
+        console.error("AI recommendation failed:", error);
+        return null;
+    }
+}
+
+
 async function fetchWeatherAndCrop() {
     const container = document.getElementById('weather-container');
     container.innerHTML = `<div class="loader"><div class="dot-flashing"></div></div>`;
@@ -835,14 +968,26 @@ async function fetchWeatherAndCrop() {
             throw new Error(errorData.error.message || 'Weather data not found.');
         }
         const weather = await response.json();
-        const data = {
+        const weatherInfo = {
             city: weather.location.name,
             temp: Math.round(weather.current.temp_c),
             condition: weather.current.condition.text,
             emoji: getWeatherEmojiFromCode(weather.current.condition.code),
-            crop: state.selectedCrops[0] || 'Sugarcane' // Keep mock crop recommendation for now
         };
-        state.weatherData = data;
+
+        const aiRecommendation = await getAiCropRecommendation(weatherInfo, state.location, state.selectedCrops);
+
+        if (aiRecommendation) {
+             state.weatherData = { ...weatherInfo, ...aiRecommendation };
+        } else {
+            // Fallback to old logic if AI fails
+            const fallbackCrop = state.selectedCrops[0] || 'Sugarcane';
+            state.weatherData = { 
+                ...weatherInfo, 
+                crop: fallbackCrop, 
+                reason: translations[state.language].crops.aiError 
+            };
+        }
     } catch (error) {
         console.error("Failed to fetch weather:", error);
         state.weatherData = { error: translations[state.language].crops.weatherError };
@@ -855,68 +1000,55 @@ function fetchMarketPrices() {
     listEl.innerHTML = `<div class="loader"><div class="dot-flashing"></div></div>`;
     const t = translations[state.language];
 
-    try {
-        const locationParts = state.location.split(',').map(p => p.trim());
-        const city = locationParts[0];
+    setTimeout(() => { // Simulate async operation
+        try {
+            const locationParts = state.location.toLowerCase().split(',').map(p => p.trim());
+            const cityRaw = locationParts[0];
+            const city = cityRaw.charAt(0).toUpperCase() + cityRaw.slice(1);
 
-        const cropsToFetchEn = state.selectedCrops.map(langCrop => {
-            const langIndex = t.cropSelection.crops.findIndex(c => c.name === langCrop);
-            if (langIndex === -1) return null;
-            return translations.en.cropSelection.crops[langIndex].name.toLowerCase();
-        }).filter(Boolean);
-        
-        const formattedData = [];
+            const cropsToFetchLang = state.selectedCrops.length > 0
+                ? state.selectedCrops
+                : ['Wheat', 'Rice', 'Cotton'].map(enCrop => {
+                    const enIndex = translations.en.cropSelection.crops.findIndex(c => c.name === enCrop);
+                    return t.cropSelection.crops[enIndex].name;
+                });
 
-        for (const cropData of offlineCropPriceData.crops) {
-            if (cropsToFetchEn.includes(cropData.crop)) {
-                let pricePerKg = null;
-                let isCitySpecific = false;
-
-                // 1. Try to find a city-specific price
-                for (const cityNameKey in cropData.cities) {
-                    if (cityNameKey.toLowerCase() === city.toLowerCase()) {
-                        pricePerKg = cropData.cities[cityNameKey];
-                        isCitySpecific = true;
-                        break;
-                    }
-                }
-
-                // 2. If no city price, fallback to state average
-                if (pricePerKg === null) {
-                    pricePerKg = cropData.state_avg_price_inr_per_kg;
-                    isCitySpecific = false;
-                }
-
-                if (pricePerKg !== null) {
+            const cropsToFetchEn = cropsToFetchLang.map(langCrop => {
+                 const langIndex = t.cropSelection.crops.findIndex(c => c.name === langCrop);
+                 return translations.en.cropSelection.crops[langIndex].name.toLowerCase();
+            });
+            
+            const priceData = offlineCropPriceData.crops
+                .filter(cropDataItem => cropsToFetchEn.includes(cropDataItem.crop))
+                .map(cropDataItem => {
+                    const pricePerKg = cropDataItem.cities[city] ?? cropDataItem.state_avg_price_inr_per_kg;
                     const pricePerQuintal = Math.round(pricePerKg * 100);
-                    const enIndex = translations.en.cropSelection.crops.findIndex(c => c.name.toLowerCase() === cropData.crop);
                     
-                    if (enIndex !== -1) {
-                        const translatedCropName = t.cropSelection.crops[enIndex].name;
-                         // Generate mock trend data for UI purposes
-                        const trend = Math.floor(Math.random() * 14) - 5; // -5% to +8%
-                        formattedData.push({
-                            crop: translatedCropName,
-                            price: pricePerQuintal,
-                            isAverage: !isCitySpecific,
-                            trend: trend
-                        });
-                    }
-                }
+                    const trend = Math.floor(Math.random() * 16) - 5; // -5 to +10
+
+                    const enIndex = translations.en.cropSelection.crops.findIndex(c => c.name.toLowerCase() === cropDataItem.crop);
+                    const translatedCropName = t.cropSelection.crops[enIndex].name;
+                    
+                    return {
+                        crop: translatedCropName,
+                        price: pricePerQuintal,
+                        trend: trend,
+                    };
+                });
+
+
+            if (priceData.length === 0) {
+                state.marketData = { noData: true };
+            } else {
+                state.marketData = priceData;
             }
-        }
 
-        if (formattedData.length === 0) {
-            state.marketData = { noData: true };
-        } else {
-            state.marketData = formattedData;
+        } catch (error) {
+            console.error("Failed to process market prices:", error);
+            state.marketData = { error: t.market.marketError };
         }
-
-    } catch (error) {
-        console.error("Failed to process market prices:", error);
-        state.marketData = { error: t.market.marketError };
-    }
-    render();
+        render();
+    }, 500);
 }
 
 
@@ -960,12 +1092,7 @@ function getGeolocation(): Promise<GeolocationPosition> {
         if (!navigator.geolocation) {
             reject(new Error('Geolocation is not supported by your browser.'));
         } else {
-            const options = {
-                enableHighAccuracy: false, // More reliable, less power-hungry
-                timeout: 15000,            // Increased timeout to 15 seconds
-                maximumAge: 0              // Don't use a cached position
-            };
-            navigator.geolocation.getCurrentPosition(resolve, reject, options);
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
         }
     });
 }
@@ -1105,21 +1232,14 @@ async function handleGenerateSms() {
             `Farmer Check-In`,
             `Time: ${new Date().toLocaleString()}`,
             `Location: ${nearest.name} (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`,
-            `Weather: ${nearest.data.temp}`,
             `Season: ${nearest.data.season}`,
-            `Recommended Crop: ${nearest.data.recommendedCrop}`,
-            `Tip: ${nearest.data.farmerTipNext2h}`
+            `Recommended Crop: ${nearest.data.crop}`
         ].join('\n');
 
         state.offlineSmsSummary = summary;
     } catch (error) {
-        // Add more detailed logging for debugging geolocation errors
-        if (error instanceof GeolocationPositionError) {
-             console.error(`Geolocation error: Code ${error.code} - ${error.message}`);
-        } else {
-             console.error("Offline SMS generation failed:", error);
-        }
-        state.offlineSmsSummary = (translations[state.language] || translations.en).offline.error;
+        console.error("Offline SMS generation failed:", error);
+        state.offlineSmsSummary = translations[state.language].offline.error;
     } finally {
         state.isGeneratingSms = false;
         renderOfflineSmsPage(); // Show result
