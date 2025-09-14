@@ -63,6 +63,7 @@ const translations = {
     appName: 'KisanMitra',
     welcome: 'Welcome!',
     selectLang: 'Please select your language',
+    previous: 'Previous',
     cropSelection: {
       title: 'Select crops',
       subtitle: 'Select up to 8 crops you are interested in.',
@@ -144,6 +145,7 @@ const translations = {
     appName: 'किसानमित्र',
     welcome: 'स्वागत है!',
     selectLang: 'कृपया अपनी भाषा चुनें',
+    previous: 'पिछला',
     cropSelection: {
       title: 'फसलें चुनें',
       subtitle: 'जिन फसलों में आपकी रुचि है, उनमें से 8 तक चुनें।',
@@ -225,6 +227,7 @@ const translations = {
     appName: 'કિસાનમિત્ર',
     welcome: 'સ્વાગત છે!',
     selectLang: 'કૃપા કરીને તમારી ભાષા પસંદ કરો',
+    previous: 'પાછળ',
     cropSelection: {
       title: 'પાક પસંદ કરો',
       subtitle: 'તમને રુચિ હોય તેવા 8 જેટલા પાક પસંદ કરો.',
@@ -305,10 +308,10 @@ const translations = {
 };
 
 const state = {
-  language: 'en',
-  appView: 'language',
+  language: 'en' as 'en' | 'hi' | 'gu',
+  setupStep: 'language' as 'language' | 'crop_selection' | 'location_selection' | 'completed',
   selectedCrops: [],
-  location: null,
+  location: null as string | null,
   activeTab: 'crops',
   isChatLoading: false,
   isChatOpen: false,
@@ -337,16 +340,10 @@ function renderCurrentView() {
   if (!state.isOnline) {
     return renderOfflineSmsPage();
   }
-  switch (state.appView) {
-    case 'language':
-      return renderLanguageSelector();
-    case 'crop_selection':
-      return renderCropSelector();
-    case 'location_selection':
-        return renderLocationSelector();
-    case 'main_app':
-      return renderAppShell();
+  if (state.setupStep !== 'completed') {
+    return renderSetupWizard();
   }
+  return renderAppShell();
 }
 
 function render() {
@@ -418,11 +415,7 @@ function renderAppShell() {
           <div class="chat-messages"></div>
           <form class="chat-form">
             <input type="text" id="chat-input" placeholder="${t.chat.placeholder}" autocomplete="off" />
-            <button type="submit" id="send-btn" aria-label="${t.chat.send}">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-              </svg>
-            </button>
+            <button type="submit" id="send-btn">${t.chat.send}</button>
           </form>
         </div>
       </div>
@@ -526,8 +519,8 @@ function renderMarketList(data, t) {
         const trendClass = isPositive ? 'positive' : 'negative';
         const trendSign = isPositive ? '+' : '';
         const trendIcon = isPositive 
-            ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14l5-5 5 5z"/></svg>`
-            : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>`;
+            ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 12L12 4L20 12H4Z"></path></svg>`
+            : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 12L12 20L4 12H20Z"></path></svg>`;
 
         return `
         <div class="market-price-card">
@@ -677,7 +670,7 @@ function renderProfilePage(t) {
   });
 
   document.getElementById('switch-lang-btn')?.addEventListener('click', () => {
-    state.appView = 'language';
+    state.setupStep = 'language';
     renderCurrentView();
   });
 }
@@ -693,98 +686,103 @@ function renderChat() {
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-function renderLanguageSelector() {
-  state.selectedCrops = [];
-  rootEl.innerHTML = `
-    <div class="language-selector-overlay">
-      <h1>${translations.en.welcome} / ${translations.hi.welcome} / ${translations.gu.welcome}</h1>
-      <p>${translations.en.selectLang} / ${translations.hi.selectLang} / ${translations.gu.selectLang}</p>
-      <div class="language-buttons">
-        <button class="language-btn" data-lang="en">English</button>
-        <button class="language-btn" data-lang="hi">हिन्दी</button>
-        <button class="language-btn" data-lang="gu">ગુજરાતી</button>
-      </div>
-    </div>
-  `;
-  document.querySelectorAll('.language-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      handleLanguageSelect((e.target as HTMLElement).dataset.lang);
-    });
-  });
-}
-
-function renderCropSelector() {
+function renderSetupWizard() {
     const t = translations[state.language];
-    const cropTranslations = t.cropSelection;
-    rootEl.innerHTML = `
-        <div class="crop-selector-page">
-            <header class="selection-header">
+    let content = '';
+    let headerContent = '';
+
+    switch(state.setupStep) {
+        case 'language':
+            headerContent = `
+                <h1>${translations.en.welcome} / ${translations.hi.welcome} / ${translations.gu.welcome}</h1>
+                <p>${translations.en.selectLang} / ${translations.hi.selectLang} / ${translations.gu.selectLang}</p>
+            `;
+            content = renderLanguageSelectorContent();
+            break;
+        case 'crop_selection':
+            const cropTranslations = t.cropSelection;
+            headerContent = `
                 <div>
                     <h1>${cropTranslations.title}</h1>
                     <p>${cropTranslations.subtitle}<br/>${cropTranslations.subtitle2}</p>
                 </div>
                 <span class="selection-counter">${cropTranslations.counter(state.selectedCrops.length)}</span>
+            `;
+            content = renderCropSelectorContent();
+            break;
+        case 'location_selection':
+            const locationTranslations = t.locationSelection;
+             headerContent = `
+                <h1>${locationTranslations.title}</h1>
+                <p>${locationTranslations.subtitle}</p>
+            `;
+            content = renderLocationSelectorContent();
+            break;
+    }
+
+    const isNextDisabled =
+        (state.setupStep === 'crop_selection' && state.selectedCrops.length === 0) ||
+        (state.setupStep === 'location_selection' && (!state.location || state.location.trim() === ''));
+
+    rootEl.innerHTML = `
+        <div class="setup-wizard step-${state.setupStep}">
+            <header class="setup-header">
+                ${headerContent}
             </header>
-            <main class="crop-grid">
-                ${cropTranslations.crops.map(crop => {
-                    const isSelected = state.selectedCrops.includes(crop.name);
-                    return `
-                    <button class="crop-item ${isSelected ? 'selected' : ''}" data-crop="${crop.name}">
-                        <div class="crop-icon-wrapper">
-                           <span class="crop-icon">${crop.emoji}</span>
-                        </div>
-                        <span class="crop-name-label">${crop.name}</span>
-                    </button>`;
-                }).join('')}
+            <main class="setup-content">
+                ${content}
             </main>
-            <footer class="selection-footer">
-                <button class="next-btn" id="next-from-crops-btn" ${state.selectedCrops.length === 0 ? 'disabled' : ''}>
-                    ${cropTranslations.next}
+            <footer class="setup-footer">
+                ${state.setupStep !== 'language' ? `<button class="setup-btn setup-btn-prev" id="setup-prev-btn">${t.previous}</button>` : '<div></div>'}
+                <button class="setup-btn setup-btn-next" id="setup-next-btn" ${isNextDisabled ? 'disabled' : ''}>
+                    ${state.setupStep === 'location_selection' ? t.locationSelection.confirm : t.cropSelection.next}
                 </button>
             </footer>
         </div>
     `;
 
-    document.querySelectorAll('.crop-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            const cropName = (e.currentTarget as HTMLElement).dataset.crop;
-            handleCropItemClick(cropName);
-        });
-    });
-
-    document.getElementById('next-from-crops-btn')?.addEventListener('click', handleNextFromCrops);
+    addSetupEventListeners();
 }
 
-function renderLocationSelector() {
-    const t = translations[state.language].locationSelection;
-    rootEl.innerHTML = `
-        <div class="location-selector-page">
-            <div class="location-content">
-                <span class="location-icon">📍</span>
-                <h1>${t.title}</h1>
-                <p>${t.subtitle}</p>
-                <form id="location-form">
-                    <input type="text" id="location-input" placeholder="${t.placeholder}" autocomplete="off" />
-                    <button type="submit" id="location-confirm-btn" disabled>${t.confirm}</button>
-                </form>
-            </div>
+function renderLanguageSelectorContent() {
+  return `
+    <div class="language-buttons">
+      <button class="language-btn ${state.language === 'en' ? 'selected' : ''}" data-lang="en">English</button>
+      <button class="language-btn ${state.language === 'hi' ? 'selected' : ''}" data-lang="hi">हिन्दी</button>
+      <button class="language-btn ${state.language === 'gu' ? 'selected' : ''}" data-lang="gu">ગુજરાતી</button>
+    </div>
+  `;
+}
+
+function renderCropSelectorContent() {
+    const t = translations[state.language];
+    const cropTranslations = t.cropSelection;
+    return `
+        <div class="crop-grid">
+            ${cropTranslations.crops.map(crop => {
+                const isSelected = state.selectedCrops.includes(crop.name);
+                return `
+                <button class="crop-item ${isSelected ? 'selected' : ''}" data-crop="${crop.name}">
+                    <div class="crop-icon-wrapper">
+                        <span class="crop-icon">${crop.emoji}</span>
+                    </div>
+                    <span class="crop-name-label">${crop.name}</span>
+                </button>`;
+            }).join('')}
         </div>
     `;
+}
 
-    const inputEl = document.getElementById('location-input') as HTMLInputElement;
-    const btnEl = document.getElementById('location-confirm-btn') as HTMLButtonElement;
-    const formEl = document.getElementById('location-form');
-
-    inputEl.addEventListener('input', () => {
-        btnEl.disabled = inputEl.value.trim() === '';
-    });
-
-    formEl.addEventListener('submit', (e) => {
-        e.preventDefault();
-        if (inputEl.value.trim()) {
-            handleLocationConfirm(inputEl.value.trim());
-        }
-    });
+function renderLocationSelectorContent() {
+    const t = translations[state.language].locationSelection;
+    return `
+        <div class="location-content-inner">
+            <span class="location-icon">📍</span>
+            <form id="location-form">
+                <input type="text" id="location-input" placeholder="${t.placeholder}" autocomplete="off" value="${state.location || ''}" />
+            </form>
+        </div>
+    `;
 }
 
 function renderOfflineSmsPage() {
@@ -1130,9 +1128,35 @@ async function handleSendMessage(prompt) {
 
 // --- EVENT HANDLERS ---
 
+function handleSetupPrev() {
+    if (state.setupStep === 'location_selection') {
+        state.setupStep = 'crop_selection';
+    } else if (state.setupStep === 'crop_selection') {
+        state.setupStep = 'language';
+    }
+    renderCurrentView();
+}
+
+function handleSetupNext() {
+    if (state.setupStep === 'language') {
+        state.setupStep = 'crop_selection';
+        state.selectedCrops = []; // Clear crops when changing language flow
+        renderCurrentView();
+    } else if (state.setupStep === 'crop_selection') {
+        if (state.selectedCrops.length > 0) {
+            state.setupStep = 'location_selection';
+            renderCurrentView();
+        }
+    } else if (state.setupStep === 'location_selection') {
+        const locationInput = document.getElementById('location-input') as HTMLInputElement;
+        if (locationInput && locationInput.value.trim()) {
+            handleLocationConfirm(locationInput.value.trim());
+        }
+    }
+}
+
 function handleLanguageSelect(lang) {
   state.language = lang;
-  state.appView = 'crop_selection';
   renderCurrentView();
 }
 
@@ -1145,19 +1169,12 @@ function handleCropItemClick(cropName) {
             state.selectedCrops.push(cropName);
         }
     }
-    renderCropSelector();
-}
-
-function handleNextFromCrops() {
-    if (state.selectedCrops.length > 0) {
-        state.appView = 'location_selection';
-        renderCurrentView();
-    }
+    renderCurrentView();
 }
 
 function handleLocationConfirm(location: string) {
     state.location = location;
-    state.appView = 'main_app';
+    state.setupStep = 'completed';
     
     // Initialize main app state
     state.chatHistory = [];
@@ -1246,40 +1263,15 @@ async function handleGenerateSms() {
 
     try {
         const cityData = offlineCityRecommendationData[state.offlineSelectedCity];
-        const recommendedCropEn = cityData.recommendedCrop; // e.g., "Wheat"
-
-        // Find market price for the recommended crop
-        let priceInfo = '';
-        const cropPriceDataItem = offlineCropPriceData.crops.find(
-            c => c.crop.toLowerCase() === recommendedCropEn.toLowerCase()
-        );
-
-        if (cropPriceDataItem) {
-            const pricePerKg = cropPriceDataItem.cities[state.offlineSelectedCity] ?? cropPriceDataItem.state_avg_price_inr_per_kg;
-            if (pricePerKg) {
-                const pricePerQuintal = Math.round(pricePerKg * 100);
-                // Format for Indian locale
-                const formattedPrice = pricePerQuintal.toLocaleString('en-IN');
-                priceInfo = `Price: ~₹${formattedPrice}/quintal`;
-            }
-        }
-
-        const summaryParts = [
+        const summary = [
             `KisanMitra Offline Advice`,
             `City: ${state.offlineSelectedCity}`,
             `Temp: ${cityData.temp}`,
-            `Crop: ${cityData.recommendedCrop}`
-        ];
+            `Crop: ${cityData.recommendedCrop}`,
+            `Tip: ${cityData.farmerTipNext2h}`
+        ].join('\n');
 
-        if (priceInfo) {
-            summaryParts.push(priceInfo);
-        }
-        
-        summaryParts.push(`Tip: ${cityData.farmerTipNext2h}`);
-
-        const summary = summaryParts.join('\n');
         state.offlineSmsSummary = summary;
-
     } catch (error) {
         console.error("Offline SMS generation failed:", error);
         state.offlineSmsSummary = translations[state.language].offline.error;
@@ -1298,6 +1290,44 @@ function toggleChat(isOpen) {
   } else {
     overlay.classList.remove('visible');
   }
+}
+
+function addSetupEventListeners() {
+    document.getElementById('setup-prev-btn')?.addEventListener('click', handleSetupPrev);
+    document.getElementById('setup-next-btn')?.addEventListener('click', handleSetupNext);
+
+    if (state.setupStep === 'language') {
+        document.querySelectorAll('.language-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                handleLanguageSelect((e.currentTarget as HTMLElement).dataset.lang as 'en' | 'hi' | 'gu');
+            });
+        });
+    } else if (state.setupStep === 'crop_selection') {
+        document.querySelectorAll('.crop-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const cropName = (e.currentTarget as HTMLElement).dataset.crop;
+                handleCropItemClick(cropName);
+            });
+        });
+    } else if (state.setupStep === 'location_selection') {
+        const inputEl = document.getElementById('location-input') as HTMLInputElement;
+        const formEl = document.getElementById('location-form');
+
+        inputEl.addEventListener('input', () => {
+            state.location = inputEl.value;
+            const nextBtn = document.getElementById('setup-next-btn') as HTMLButtonElement;
+            if (nextBtn) {
+                nextBtn.disabled = !state.location || state.location.trim() === '';
+            }
+        });
+
+        formEl.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleSetupNext();
+        });
+        
+        inputEl.focus();
+    }
 }
 
 function addEventListeners() {
@@ -1324,8 +1354,8 @@ function main() {
   window.addEventListener('online', () => {
     if (!state.isOnline) {
       state.isOnline = true;
-      if (state.appView !== 'main_app') {
-          state.appView = 'language';
+      if (state.setupStep !== 'completed') {
+          state.setupStep = 'language';
       }
       renderCurrentView();
     }

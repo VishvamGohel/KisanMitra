@@ -1,40 +1,20 @@
-# 🌾 KisanMitra – Smart AI Farming Assistant
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+</div>
 
-KisanMitra is a simple, farmer-friendly app that uses *AI & real-time data* to improve crop decisions, detect plant diseases, and provide market and scheme updates.  
-The app works in *Hindi, Gujarati, and English* so every farmer can use it easily.
+# Run and deploy your AI Studio app
 
----
+This contains everything you need to run your app locally.
 
-## 🚜 Problem
-- 🌧️ Unpredictable weather & crop failures  
-- 📉 No awareness of market prices & schemes  
-- 🌱 Hard to identify plant diseases  
-- 📱 Tech must be simple & offline-friendly  
+View your app in AI Studio: https://ai.studio/apps/drive/1jyArK0yqPeTbVwHdGOUtISeNRd4QtUpS
 
----
+## Run Locally
 
-## 🌟 Key Features
-- *📊 Market Rates* – Daily crop prices  
-- *🏛️ Govt Schemes* – Easy explanations & eligibility  
-- *👤 Profile* – Soil type, land size → better AI advice  
-- *🤖 Chatbot* – Agri-specialized (text + voice)  
-- *🌿 Disease Detection* – AI model for crop health  
-- *🌱 Crop Recommendation* – Real-time suggestions  
-- *🌐 Multi-lingual* – Hindi, Gujarati, English  
-- *📴 Offline Mode* – Works in low internet areas  
+**Prerequisites:**  Node.js
 
----
 
-## 🛠️ Tech Stack
-- *Frontend*: HTML, CSS, TypeScript (TSX)  
-- *Backend*: Node.js + JSON APIs  
-- *AI/ML*: Crop recommendation, disease recognition models  
-
----
-
-## ⚡ Quick Setup
-```bash
-git clone https://github.com/VishvamGohel/KisanMitra.git
-cd KisanMitra
-npm install
-npm run dev
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
