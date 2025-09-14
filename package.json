@@ -4,9 +4,9 @@
   "description": "Local development setup for KisanMitra app.",
   "main": "index.tsx",
   "scripts": {
-    "dev": "node esbuild.config.mjs",
-    "build": "node esbuild.config.mjs --build"
-  },
+  "dev": "node esbuild.config.mjs --watch",
+  "build": "node esbuild.config.mjs"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",

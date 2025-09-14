@@ -1,1 +1,35 @@
-Šjh®×¬nè¥t
+// esbuild.config.mjs
+import * as esbuild from "esbuild";
+
+const isDev = process.argv.includes("--watch");
+
+const options = {
+  entryPoints: ["index.tsx"],
+  bundle: true,
+  outfile: "dist/main.js",
+  platform: "browser",
+  sourcemap: true,
+  loader: {
+    ".png": "file",
+    ".jpg": "file",
+    ".jpeg": "file",
+    ".svg": "file"
+  }
+};
+
+async function runBuild() {
+  if (isDev) {
+    // âœ… Use context API for watch mode
+    const ctx = await esbuild.context(options);
+    await ctx.watch();
+    console.log("ðŸ‘€ Watching for changes...");
+  } else {
+    await esbuild.build(options);
+    console.log("âœ… Build complete");
+  }
+}
+
+runBuild().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

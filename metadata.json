@@ -2,6 +2,7 @@
   "name": "KisanMitra",
   "description": "An AI-powered farming assistant with multi-language support, built with HTML, CSS, and TypeScript. Features include weather updates, crop recommendations, market prices, government scheme information, and a personal profile tab.",
   "requestFramePermissions": [
-    "geolocation"
+    "geolocation",
+    "microphone"
   ]
 }

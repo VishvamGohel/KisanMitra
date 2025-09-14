@@ -4,7 +4,8 @@ import { marked } from 'marked';
 // TODO: Replace with your actual WeatherAPI.com API key
 const WEATHER_API_KEY = '4522ecbfce5d46fab22115230251309';
 
-const ai = new GoogleGenAI({apiKey: process.env.API_KEY});
+// TODO: Replace 'YOUR_GOOGLE_GENAI_API_KEY' with your actual API key or use a secure method to inject it
+const ai = new GoogleGenAI({apiKey: 'AIzaSyCvEfS-nRy8q1Bpx2SQiRIXzoKdVdjKMOA'});
 let chat: Chat;
 
 const offlineCropPriceData = {
@@ -34,13 +35,27 @@ const offlineCropPriceData = {
   ]
 };
 
-const offlineCityData = {
-  'Pune': { lat: 18.5204, lon: 73.8567, season: 'Rabi', crop: 'Wheat' },
-  'Nagpur': { lat: 21.1458, lon: 79.0882, season: 'Kharif', crop: 'Cotton' },
-  'Nashik': { lat: 20.0112, lon: 73.7909, season: 'Rabi', crop: 'Onion' },
-  'Jaipur': { lat: 26.9124, lon: 75.7873, season: 'Rabi', crop: 'Mustard' },
-  'Lucknow': { lat: 26.8467, lon: 80.9462, season: 'Rabi', crop: 'Wheat' },
-  'Patna': { lat: 25.5941, lon: 85.1376, season: 'Kharif', crop: 'Rice' },
+const offlineCityRecommendationData = {
+  "Ahmedabad": { "season": "Rabi", "recommendedCrop": "Wheat", "farmerTipNext2h": "Irrigate lightly in the evening to retain soil moisture.", "temp": "30°C" },
+  "Surat": { "season": "Kharif", "recommendedCrop": "Cotton", "farmerTipNext2h": "Check for pest activity on leaves and apply neem spray if needed.", "temp": "29°C" },
+  "Rajkot": { "season": "Rabi", "recommendedCrop": "Groundnut", "farmerTipNext2h": "Avoid overwatering, keep soil slightly dry for healthy pods.", "temp": "32°C" },
+  "Vadodara": { "season": "Summer", "recommendedCrop": "Maize", "farmerTipNext2h": "Weed your maize field now for better growth this season.", "temp": "34°C" },
+  "Bhavnagar": { "season": "Kharif", "recommendedCrop": "Bajra", "farmerTipNext2h": "Prepare soil for next sowing with light tilling.", "temp": "31°C" },
+  "Junagadh": { "season": "Kharif", "recommendedCrop": "Cotton", "farmerTipNext2h": "Monitor for bollworm and remove infected bolls immediately.", "temp": "28°C" },
+  "Jamnagar": { "season": "Rabi", "recommendedCrop": "Wheat", "farmerTipNext2h": "Apply fertilizer top-dressing before irrigation today.", "temp": "29°C" },
+  "Gandhinagar": { "season": "Summer", "recommendedCrop": "Vegetables (Okra)", "farmerTipNext2h": "Harvest ripe okra pods in the early morning.", "temp": "33°C" },
+  "Anand": { "season": "Rabi", "recommendedCrop": "Rice", "farmerTipNext2h": "Drain excess water from rice field if standing.", "temp": "27°C" },
+  "Nadiad": { "season": "Summer", "recommendedCrop": "Maize", "farmerTipNext2h": "Apply organic compost for soil health improvement.", "temp": "34°C" },
+  "Bharuch": { "season": "Kharif", "recommendedCrop": "Sugarcane", "farmerTipNext2h": "Check sugarcane shoots for early stem borer damage.", "temp": "30°C" },
+  "Navsari": { "season": "Kharif", "recommendedCrop": "Rice", "farmerTipNext2h": "Spray fungicide if you observe leaf spot symptoms.", "temp": "28°C" },
+  "Valsad": { "season": "Kharif", "recommendedCrop": "Banana", "farmerTipNext2h": "Support banana plants with bamboo to avoid wind damage.", "temp": "30°C" },
+  "Porbandar": { "season": "Summer", "recommendedCrop": "Groundnut", "farmerTipNext2h": "Check soil moisture; irrigate if cracks appear.", "temp": "33°C" },
+  "Mehsana": { "season": "Rabi", "recommendedCrop": "Mustard", "farmerTipNext2h": "Remove weeds now to avoid competition for nutrients.", "temp": "26°C" },
+  "Palanpur": { "season": "Rabi", "recommendedCrop": "Cumin", "farmerTipNext2h": "Thin seedlings to improve spacing and yield.", "temp": "25°C" },
+  "Bhuj": { "season": "Summer", "recommendedCrop": "Millets", "farmerTipNext2h": "Mulch the soil to preserve moisture in hot weather.", "temp": "36°C" },
+  "Morbi": { "season": "Rabi", "recommendedCrop": "Cotton", "farmerTipNext2h": "Clean fallen leaves around plants to prevent pests.", "temp": "31°C" },
+  "Patan": { "season": "Rabi", "recommendedCrop": "Wheat", "farmerTipNext2h": "Irrigate wheat field in the evening for best results.", "temp": "28°C" },
+  "Dahod": { "season": "Kharif", "recommendedCrop": "Maize", "farmerTipNext2h": "Spray organic pest repellent in the evening.", "temp": "27°C" }
 };
 
 const translations = {
@@ -114,12 +129,13 @@ const translations = {
     },
     offline: {
         title: 'Offline Mode',
-        description: 'You are offline. Enter your phone number to get a basic crop recommendation via SMS.',
+        description: 'You are offline. Select your city and enter your phone number to get a basic crop recommendation via SMS.',
+        selectCity: 'Select your city',
         placeholder: 'Enter phone number',
         button: 'Get Recommendation',
-        generating: 'Getting location & recommendation...',
+        generating: 'Getting recommendation...',
         sendSms: 'Send via SMS',
-        error: 'Could not get location. Please ensure location services are enabled.',
+        error: 'Could not generate recommendation. Please try again.',
     },
     systemInstruction: "You are 'KisanMitra', a friendly AI for Indian farmers. Respond in simple English. Use farmer-friendly emojis like 🌾, 🌱, 💧, ☀️, 🙏. Keep answers short.",
     explainScheme: (name) => `Explain the '${name}' scheme in simple terms.`,
@@ -194,12 +210,13 @@ const translations = {
     },
     offline: {
         title: 'ऑफ़लाइन मोड',
-        description: 'आप ऑफ़लाइन हैं। SMS के माध्यम से फसल की सिफारिश पाने के लिए अपना फ़ोन नंबर दर्ज करें।',
+        description: 'आप ऑफ़लाइन हैं। SMS के माध्यम से फसल की सिफारिश पाने के लिए अपना शहर चुनें और अपना फ़ोन नंबर दर्ज करें।',
+        selectCity: 'अपना शहर चुनें',
         placeholder: 'फ़ोन नंबर दर्ज करें',
         button: 'सिफारिश प्राप्त करें',
-        generating: 'स्थान और सिफारिश प्राप्त हो रही है...',
+        generating: 'सिफारिश प्राप्त हो रही है...',
         sendSms: 'SMS द्वारा भेजें',
-        error: 'स्थान की जानकारी नहीं मिल सकी। कृपया सुनिश्चित करें कि लोकेशन सेवाएं सक्षम हैं।',
+        error: 'सिफारिश उत्पन्न नहीं की जा सकी। कृपया पुनः प्रयास करें।',
     },
     systemInstruction: "आप 'किसानमित्र' हैं, भारतीय किसानों के लिए एक मित्र एआई। सरल हिंदी में जवाब दें। 🌾, 🌱, 💧, ☀️, 🙏 जैसे किसान-हितैषी इमोजी का प्रयोग करें। उत्तर संक्षिप्त रखें।",
     explainScheme: (name) => `'${name}' योजना को सरल शब्दों में समझाएं।`,
@@ -274,12 +291,13 @@ const translations = {
     },
     offline: {
         title: 'ઑફલાઇન મોડ',
-        description: 'તમે ઑફલાઇન છો. SMS દ્વારા પાકની ભલામણ મેળવવા માટે તમારો ફોન નંબર દાખલ કરો.',
+        description: 'તમે ઑફલાઇન છો. SMS દ્વારા પાકની ભલામણ મેળવવા માટે તમારું શહેર પસંદ કરો અને તમારો ફોન નંબર દાખલ કરો.',
+        selectCity: 'તમારું શહેર પસંદ કરો',
         placeholder: 'ફોન નંબર દાખલ કરો',
         button: 'ભલામણ મેળવો',
-        generating: 'સ્થાન અને ભલામણ મેળવી રહ્યાં છીએ...',
+        generating: 'ભલામણ મેળવી રહ્યાં છીએ...',
         sendSms: 'SMS દ્વારા મોકલો',
-        error: 'સ્થાન મેળવી શકાયું નથી। કૃપા કરીને ખાતરી કરો કે સ્થાન સેવાઓ સક્ષમ છે.',
+        error: 'ભલામણ જનરેટ કરી શકાઈ નથી. કૃપા કરીને ફરી પ્રયાસ કરો.',
     },
     systemInstruction: "તમે 'કિસાનમિત્ર' છો, ભારતીય ખેડૂતો માટે મૈત્રીપૂર્ણ AI. સરળ ગુજરાતીમાં જવાબ આપો. 🌾, 🌱, 💧, ☀️, 🙏 જેવા ખેડૂત-મૈત્રીપૂર્ણ ઇમોજીનો ઉપયોગ કરો. જવાબો ટૂંકા રાખો.",
     explainScheme: (name) => `'${name}' યોજનાને સરળ શબ્દોમાં સમજાવો.`,
@@ -305,6 +323,7 @@ const state = {
   offlineSmsNumber: '',
   offlineSmsSummary: null as string | null,
   isGeneratingSms: false,
+  offlineSelectedCity: null as string | null,
   farmLandSize: null as string | null,
   farmSoilType: null as string | null,
   farmIrrigation: null as string | null,
@@ -399,7 +418,11 @@ function renderAppShell() {
           <div class="chat-messages"></div>
           <form class="chat-form">
             <input type="text" id="chat-input" placeholder="${t.chat.placeholder}" autocomplete="off" />
-            <button type="submit" id="send-btn">${t.chat.send}</button>
+            <button type="submit" id="send-btn" aria-label="${t.chat.send}">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+              </svg>
+            </button>
           </form>
         </div>
       </div>
@@ -503,8 +526,8 @@ function renderMarketList(data, t) {
         const trendClass = isPositive ? 'positive' : 'negative';
         const trendSign = isPositive ? '+' : '';
         const trendIcon = isPositive 
-            ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 12L12 4L20 12H4Z"></path></svg>`
-            : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 12L12 20L4 12H20Z"></path></svg>`;
+            ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14l5-5 5 5z"/></svg>`
+            : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>`;
 
         return `
         <div class="market-price-card">
@@ -776,6 +799,10 @@ function renderOfflineSmsPage() {
             <a href="sms:${state.offlineSmsNumber}?body=${encodeURIComponent(state.offlineSmsSummary)}" class="send-sms-link">${t.offline.sendSms}</a>
         `;
     }
+    
+    const cityOptions = Object.keys(offlineCityRecommendationData).map(city =>
+        `<option value="${city}" ${state.offlineSelectedCity === city ? 'selected' : ''}>${city}</option>`
+    ).join('');
 
     rootEl.innerHTML = `
         <div class="offline-page">
@@ -783,8 +810,12 @@ function renderOfflineSmsPage() {
                 <h1>${t.offline.title}</h1>
                 <p>${t.offline.description}</p>
                 <div class="offline-form">
+                    <select id="offline-city-select" class="offline-input">
+                        <option value="">${t.offline.selectCity}</option>
+                        ${cityOptions}
+                    </select>
                     <input type="tel" id="sms-phone-input" class="offline-input" placeholder="${t.offline.placeholder}" value="${state.offlineSmsNumber}" />
-                    <button id="generate-sms-btn" class="offline-btn" ${state.offlineSmsNumber.length < 10 ? 'disabled' : ''}>${t.offline.button}</button>
+                    <button id="generate-sms-btn" class="offline-btn" ${!state.offlineSelectedCity || state.offlineSmsNumber.length < 10 ? 'disabled' : ''}>${t.offline.button}</button>
                 </div>
                 <div id="sms-result-section">
                     ${resultSection}
@@ -795,10 +826,20 @@ function renderOfflineSmsPage() {
 
     const phoneInput = document.getElementById('sms-phone-input') as HTMLInputElement;
     const generateBtn = document.getElementById('generate-sms-btn') as HTMLButtonElement;
+    const citySelect = document.getElementById('offline-city-select') as HTMLSelectElement;
+
+    const updateButtonState = () => {
+        generateBtn.disabled = !state.offlineSelectedCity || state.offlineSmsNumber.length < 10;
+    };
 
     phoneInput.addEventListener('input', (e) => {
         state.offlineSmsNumber = (e.target as HTMLInputElement).value;
-        generateBtn.disabled = state.offlineSmsNumber.length < 10;
+        updateButtonState();
+    });
+    
+    citySelect.addEventListener('change', (e) => {
+        state.offlineSelectedCity = (e.target as HTMLSelectElement).value || null;
+        updateButtonState();
     });
 
     generateBtn.addEventListener('click', handleGenerateSms);
@@ -1087,31 +1128,6 @@ async function handleSendMessage(prompt) {
   }
 }
 
-function getGeolocation(): Promise<GeolocationPosition> {
-    return new Promise((resolve, reject) => {
-        if (!navigator.geolocation) {
-            reject(new Error('Geolocation is not supported by your browser.'));
-        } else {
-            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
-        }
-    });
-}
-
-function findNearestCity(lat: number, lon: number): { name: string; data: typeof offlineCityData[keyof typeof offlineCityData] } {
-    let nearestCity = null;
-    let minDistance = Infinity;
-
-    for (const cityName in offlineCityData) {
-        const city = offlineCityData[cityName];
-        const distance = Math.sqrt(Math.pow(city.lat - lat, 2) + Math.pow(city.lon - lon, 2));
-        if (distance < minDistance) {
-            minDistance = distance;
-            nearestCity = { name: cityName, data: city };
-        }
-    }
-    return nearestCity;
-}
-
 // --- EVENT HANDLERS ---
 
 function handleLanguageSelect(lang) {
@@ -1219,24 +1235,51 @@ function handleClearDiagnosis() {
 }
 
 async function handleGenerateSms() {
+    if (!state.offlineSelectedCity) return;
+
     state.isGeneratingSms = true;
     state.offlineSmsSummary = null;
     renderOfflineSmsPage(); // Show loader
 
+    // Simulate a small delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     try {
-        const position = await getGeolocation();
-        const { latitude, longitude } = position.coords;
-        const nearest = findNearestCity(latitude, longitude);
+        const cityData = offlineCityRecommendationData[state.offlineSelectedCity];
+        const recommendedCropEn = cityData.recommendedCrop; // e.g., "Wheat"
 
-        const summary = [
-            `Farmer Check-In`,
-            `Time: ${new Date().toLocaleString()}`,
-            `Location: ${nearest.name} (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`,
-            `Season: ${nearest.data.season}`,
-            `Recommended Crop: ${nearest.data.crop}`
-        ].join('\n');
+        // Find market price for the recommended crop
+        let priceInfo = '';
+        const cropPriceDataItem = offlineCropPriceData.crops.find(
+            c => c.crop.toLowerCase() === recommendedCropEn.toLowerCase()
+        );
 
+        if (cropPriceDataItem) {
+            const pricePerKg = cropPriceDataItem.cities[state.offlineSelectedCity] ?? cropPriceDataItem.state_avg_price_inr_per_kg;
+            if (pricePerKg) {
+                const pricePerQuintal = Math.round(pricePerKg * 100);
+                // Format for Indian locale
+                const formattedPrice = pricePerQuintal.toLocaleString('en-IN');
+                priceInfo = `Price: ~₹${formattedPrice}/quintal`;
+            }
+        }
+
+        const summaryParts = [
+            `KisanMitra Offline Advice`,
+            `City: ${state.offlineSelectedCity}`,
+            `Temp: ${cityData.temp}`,
+            `Crop: ${cityData.recommendedCrop}`
+        ];
+
+        if (priceInfo) {
+            summaryParts.push(priceInfo);
+        }
+        
+        summaryParts.push(`Tip: ${cityData.farmerTipNext2h}`);
+
+        const summary = summaryParts.join('\n');
         state.offlineSmsSummary = summary;
+
     } catch (error) {
         console.error("Offline SMS generation failed:", error);
         state.offlineSmsSummary = translations[state.language].offline.error;
